@@ -1,0 +1,96 @@
+body {
+  background-color: rgb(36, 0, 56) /* dark purple */;
+  color: white;
+}
+.center-outside {
+  text-align: center;
+  width: 100%;
+}
+
+.center-div {
+  display: inline-block;
+  padding: 1em;
+  border-radius:4px;
+  margin-top: 100px;
+}
+.Signin, .jbx-header {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 50px;
+	width: 100%;
+	background: #500e7d;
+	user-select: none;
+	color: #fff;
+	z-index: 100;
+}
+.Signin .jbg-header .jbg-top-logo {
+	height: 28px;
+	margin: 12px auto 0;
+}
+form {
+  background-color: #8511bb;
+  border-radius: 4px;
+  padding: 25px;
+  font-size: 20px;
+}
+form input {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+input, textarea {
+ -moz-user-select: text;
+}
+
+input[type=text],
+input[type=submit],
+input[type=number],
+input[type=password],
+input[type=button] {
+  background-color:#919198;
+  border: 2px solid #838181;
+  border-radius: 4px;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size:14px;
+}
+
+input:hover {
+  background-color:#525257;
+  color: white;
+  -webkit-transition: 0.5s;
+}
+
+input:focus {
+  outline: none;
+  border: 3px solid #826e9a;
+  -webkit-transition: 0.5s;
+}
+
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+button {
+  background-color:#e3e5e8;
+  border: 2px solid #e3e5e8;
+  border-radius: 4px;
+  padding: 12px 20px;
+  font-size:14px;
+  cursor: pointer;
+}
+
+
+select {
+  background-color:#e3e5e8;
+  border: 2px solid #e3e5e8;
+  border-radius: 4px;
+  padding: 12px 20px;
+  font-size:14px;
+}
+
+select:focus {
+  outline: none;
+}
