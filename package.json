@@ -1,0 +1,24 @@
+{
+  "name": "nodejs-fakin-it",
+  "version": "1.0.0",
+  "description": "a replica of fakin it by jackbox games with node js",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/suryajasper/NodeJS-Fakin-It.git"
+  },
+  "author": "Surya Jasper",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/suryajasper/NodeJS-Fakin-It/issues"
+  },
+  "homepage": "https://github.com/suryajasper/NodeJS-Fakin-It#readme"
+}
