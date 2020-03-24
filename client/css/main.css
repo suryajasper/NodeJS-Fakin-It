@@ -106,3 +106,13 @@ select {
 select:focus {
   outline: none;
 }
+
+tr td {
+  display: inline-block;
+}
+
+ol li {
+  color: white;
+  font-family: inherit;
+  font-size: inherit;
+}
