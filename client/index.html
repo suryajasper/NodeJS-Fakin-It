@@ -2,19 +2,19 @@
   <head>
     <title>Fakin it</title>
     <meta charset = "utf-8"></meta>
-    <script src = "https://cdn.socket.io/socket.io-1.4.5.js"></script>
   </head>
   <link rel="stylesheet" href="css/main.css">
+  <script src="/socket.io/socket.io.js"></script><script> var socket = io(); </script>
   <body>
     <div class ="center-outside">
-      <div class = "Signin">
+      <div class = "header-outer">
         <header class = "jbx-header">
           <img class = "jbg-top-logo" alt = "jbg-top-logo" src = "images/logo.svg"></img>
         </header>
         <div class = "center-div">
           <form id = "form">
             Enter your game name<br>
-            <input type = "text" id = "gameName" placeholder="4 digit game id"></input><br><br>
+            <input type = "text" id = "gameName" placeholder="game id"></input><br><br>
             <p id = "nameText">Enter your name ()</p>
             <input type = "text" id = "playerName" placeholder = "your name"></input><br><br>
             <input type = "submit" id = "submitButton" value = "Join Game"></input>
