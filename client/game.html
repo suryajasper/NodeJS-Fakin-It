@@ -18,27 +18,12 @@
           <img class = "jbg-top-logo" alt = "jbg-top-logo" src = "images/logo.svg"></img>
         </header>
       </div>
-        <div class = "center-div">
-          <form id = "form">
-            Enter your game name<br>
-            <input type = "text" id = "gameName" placeholder="game id"></input><br><br>
-            <p id = "nameText">Enter your name ()</p>
-            <input type = "text" id = "playerName" placeholder = "your name"></input><br><br>
-            <input type = "submit" id = "submitButton" value = "Join Game"></input>
-          </form>
-          <div style = "display: none;" id = "lobby">
-            <h1>Waiting for more players to join</h1>
-            <div class ="center-outside">
-              <div class ="center-div" style = "margin-top: 10px;">
-                <ol type="1" id = 'playerlist'>
-
-                </ol>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div style = "margin-top: 50px;" id = "role">
+        <canvas id = "slider" style = "width: 100%; height: 20px;"></canvas>
+        <h1>Raise your hand if you've ever been to jail.</h1>
+      </div>
     </div>
-    <script src = "js/clientStyle.js"></script>
     <script src = "js/clientProgram.js"></script>
+    <script src = "js/slider.js"></script>
   </body>
 </html>

@@ -116,3 +116,8 @@ ol li {
   font-family: inherit;
   font-size: inherit;
 }
+
+canvas {
+  position: relative;
+  z-index: 200;
+}
