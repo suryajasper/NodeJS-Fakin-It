@@ -1,11 +1,10 @@
-var socket = io();
-
 var submitButton = document.getElementById('submitButton');
 var playerName = document.getElementById('playerName');
 var gameName = document.getElementById('gameName');
 
 var form = document.getElementById('form');
 var lobby = document.getElementById('lobby');
+
 form.style.display = "block";
 lobby.style.display = "none";
 
@@ -37,6 +36,11 @@ submitButton.onclick = function(e) {
   gameButtons.style.display = 'block';
   footertext.style.display = 'none';
 
+  socket.on('redirect', function(destination) {
+    socket.emit('print', 'user is being redirected');
+    window.location.href = destination;
+  });
+
   leaveButton.onclick = function() {
     form.style.display = "block";
     lobby.style.display = "none";
@@ -44,12 +48,11 @@ submitButton.onclick = function(e) {
     footertext.style.display = 'block';
     socket.emit('playerLeaving', playerName.value);
   }
-  socket.on('get role', function(newRole){
-    console.log(newRole);
-  });
   startButton.onclick = function() {
     console.log('clicked');
-    socket.emit('give me a role');
+    socket.emit('randomize roles');
+    socket.emit('print', 'asking server to redirect');
+    socket.emit('redirect me to the game');
   }
 }
 

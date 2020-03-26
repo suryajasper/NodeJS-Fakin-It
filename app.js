@@ -37,6 +37,10 @@ io.on('connection', function(socket){
   var nameOfPlayer;
   clientID.push(socket.id);
 
+  socket.on('print', function(toPrint) {
+    console.log(toPrint);
+  });
+
   socket.on('playerName', function(pname){
     nameOfPlayer = pname;
     console.log('playerName: ' + pname);
@@ -63,18 +67,29 @@ io.on('connection', function(socket){
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
   /*<<<<<<<<<<<<<<<<<<<<<<<ACTUAL GAME SERVER>>>>>>>>>>>>>>>>>>>>>>>>>*/
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
-  socket.on('give me a role', function(){
-    var randInd = Math.floor(Math.random() * clientID.length);
-    //console.log(io.sockets.connected[clientID[randInd]]);
+  socket.on('redirect me to the game', function(){
     for (var i = 0; i < clientID.length; i++) {
-      if (randInd == i) {
-        io.sockets.connected[clientID[i]].emit('get role', "Try to blend in!!!");
-      } else {
-        io.sockets.connected[clientID[i]].emit('get role', "raise your hand if you're low iq")
-      }
+      var destination = '/game.html';
+      io.sockets.connected[clientID[i]].emit('redirect', destination);
     }
   });
 
+  var randID;
+
+  socket.on('randomize roles', function() {
+    console.log('RANDOMIZING ROLES with ' + clientID.length.toString() + ' clients.');
+    randID = clientID[Math.floor(Math.random() * clientID.length)];
+    console.log('randID = ' + randID.toString());
+  });
+
+  socket.on('give me a role', function(){
+    console.log('getting a role from id ' + socket.id.toString());
+    if (randID === socket.id) {
+      socket.emit('get role', "Try to blend in!!!");
+    } else {
+      socket.emit('get role', "raise your hand if you're low iq")
+    }
+  });
 });
 
 http.listen(gameID, function(){
