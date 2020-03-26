@@ -1,6 +1,7 @@
 
 var slider = document.getElementById('slider');
 var start = 0;
+var factor = 2000;
 
 async function wait(timeout) {
   return new Promise(resolve => {
@@ -20,10 +21,10 @@ function setToPercent(percent) {
 setToPercent(start);
 
 async function timer(seconds) {
-  for (var i = 0; i < seconds * 12; i++) {
-    start+= 1;
+  for (var i = 0; i < factor; i++) {
+    start+= 100 / factor;
     setToPercent(start);
-    await wait(seconds / 12);
+    await wait(seconds / factor);
   }
 }
 

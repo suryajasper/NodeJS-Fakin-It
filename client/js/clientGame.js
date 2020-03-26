@@ -16,6 +16,7 @@ function getCookie(cname) {
   return null;
 }
 
+socket.emit('sending identity', getCookie('username'));
 socket.emit('give me a role');
 socket.on('get role', function(newRole){
   roleOut.innerHTML = newRole;

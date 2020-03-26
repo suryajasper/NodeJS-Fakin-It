@@ -7,21 +7,34 @@ var gameID = process.env.PORT || 2000;
 
 var playerNames = [];
 var clientID = [];
+
+var nameToId = {};
+
 /*
 var randomized = false;
 var randomInd = 0;
-var roundNum = 1;*/
+var roundNum = 1;
+*/
 
 Array.prototype.remove = function() {
-    var what, a = arguments, L = a.length, ax;
-    while (L && this.length) {
-        what = a[--L];
-        while ((ax = this.indexOf(what)) !== -1) {
-            this.splice(ax, 1);
-        }
+  var what, a = arguments, L = a.length, ax;
+  while (L && this.length) {
+    what = a[--L];
+    while ((ax = this.indexOf(what)) !== -1) {
+      this.splice(ax, 1);
     }
-    return this;
+  }
+  return this;
 };
+
+function getKeyByValue(object, value) {
+  for (var prop in object) {
+    if (object.hasOwnProperty(prop)) {
+      if (object[prop] === value)
+      return prop;
+    }
+  }
+}
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/client/index.html');
@@ -43,6 +56,7 @@ io.on('connection', function(socket){
 
   socket.on('playerName', function(pname){
     nameOfPlayer = pname;
+    io.emit('makeCookie', 'username=' + pname + ';');
     console.log('playerName: ' + pname);
     playerNames.push(pname);
     io.emit('newPlayerList', playerNames);
@@ -67,6 +81,7 @@ io.on('connection', function(socket){
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
   /*<<<<<<<<<<<<<<<<<<<<<<<ACTUAL GAME SERVER>>>>>>>>>>>>>>>>>>>>>>>>>*/
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
+
   socket.on('redirect me to the game', function(){
     for (var i = 0; i < clientID.length; i++) {
       var destination = '/game.html';
@@ -74,17 +89,22 @@ io.on('connection', function(socket){
     }
   });
 
-  var randID;
+  var randName;
 
   socket.on('randomize roles', function() {
     console.log('RANDOMIZING ROLES with ' + clientID.length.toString() + ' clients.');
-    randID = clientID[Math.floor(Math.random() * clientID.length)];
-    console.log('randID = ' + randID.toString());
+    randName = Object.keys(nameToId)[Math.floor(Math.random() * Object.keys(nameToId).length)];
+    console.log('randName = ' + randName.toString());
+  });
+
+  socket.on('sending identity', function(playername) {
+    nameToId[playername] = socket.id;
   });
 
   socket.on('give me a role', function(){
     console.log('getting a role from id ' + socket.id.toString());
-    if (randID === socket.id) {
+    var currName = getKeyByValue(nameToId, socket.id);
+    if (randName === currName) {
       socket.emit('get role', "Try to blend in!!!");
     } else {
       socket.emit('get role', "raise your hand if you're low iq")

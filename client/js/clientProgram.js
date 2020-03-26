@@ -27,14 +27,26 @@ function refreshList(names) {
   }
 }
 
+function setCookie(cookieText, exdays) {
+  var d = new Date();
+  d.setTime(d.getTime() + (exdays*24*60*60*1000));
+  var expires = "expires="+ d.toUTCString();
+  document.cookie = cookieText + expires + ";path=/";
+}
+
 submitButton.onclick = function(e) {
   e.preventDefault();
   socket.emit('playerName', playerName.value);
+  socket.emit('sending identity', playerName.value);
   socket.emit('gameName', gameName.value);
   form.style.display = "none";
   lobby.style.display = "block";
   gameButtons.style.display = 'block';
   footertext.style.display = 'none';
+
+  socket.on('makeCookie', function(cookieText) {
+    setCookie(cookieText, 365);
+  });
 
   socket.on('redirect', function(destination) {
     socket.emit('print', 'user is being redirected');
