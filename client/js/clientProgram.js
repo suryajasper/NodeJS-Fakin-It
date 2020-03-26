@@ -44,6 +44,13 @@ submitButton.onclick = function(e) {
     footertext.style.display = 'block';
     socket.emit('playerLeaving', playerName.value);
   }
+  socket.on('get role', function(newRole){
+    console.log(newRole);
+  });
+  startButton.onclick = function() {
+    console.log('clicked');
+    socket.emit('give me a role');
+  }
 }
 
 socket.on('newPlayerList', function(newPlayerList){

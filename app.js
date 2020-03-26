@@ -6,6 +6,11 @@ var io = require('socket.io')(http);
 var gameID = process.env.PORT || 2000;
 
 var playerNames = [];
+var clientID = [];
+/*
+var randomized = false;
+var randomInd = 0;
+var roundNum = 1;*/
 
 Array.prototype.remove = function() {
     var what, a = arguments, L = a.length, ax;
@@ -24,8 +29,13 @@ app.get('/', function(req, res) {
 app.use(express.static(__dirname + '/client'));
 
 io.on('connection', function(socket){
+  /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
+  /*<<<<<<<<<<<<<<<<<CONNECTIONS AND DISCONNECTIONS>>>>>>>>>>>>>>>>>>>*/
+  /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
+
   console.log('a user connected');
   var nameOfPlayer;
+  clientID.push(socket.id);
 
   socket.on('playerName', function(pname){
     nameOfPlayer = pname;
@@ -38,7 +48,6 @@ io.on('connection', function(socket){
   });
 
   // playerLeaving
-
   socket.on('playerLeaving', function(){
     console.log('player left');
     playerNames.remove(nameOfPlayer);
@@ -50,6 +59,22 @@ io.on('connection', function(socket){
     playerNames.remove(nameOfPlayer);
     io.emit('newPlayerList', playerNames);
   });
+
+  /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
+  /*<<<<<<<<<<<<<<<<<<<<<<<ACTUAL GAME SERVER>>>>>>>>>>>>>>>>>>>>>>>>>*/
+  /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
+  socket.on('give me a role', function(){
+    var randInd = Math.floor(Math.random() * clientID.length);
+    //console.log(io.sockets.connected[clientID[randInd]]);
+    for (var i = 0; i < clientID.length; i++) {
+      if (randInd == i) {
+        io.sockets.connected[clientID[i]].emit('get role', "Try to blend in!!!");
+      } else {
+        io.sockets.connected[clientID[i]].emit('get role', "raise your hand if you're low iq")
+      }
+    }
+  });
+
 });
 
 http.listen(gameID, function(){
