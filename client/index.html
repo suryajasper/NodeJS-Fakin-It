@@ -1,7 +1,7 @@
 <html>
   <head>
     <title>Fakin it</title>
-    <meta charset = "utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <meta charset = "utf-8" name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="images/jasperboxlogo.png">
     <script
 			  src="https://code.jquery.com/jquery-3.4.1.min.js"
@@ -39,13 +39,15 @@
       </div>
       <div class = "footer-outer">
         <header class = "jbx-footer">
-          <p>
+          <p id = "disclaimer">
             Check out source code on github or through the inspector (I'm a good person, so I didn't minify the code)<br>
             I was too lazy to research Jackbox Games to see if they were chill about someone making a worse version of their game,<br>
             so if this site gets shut down, that's probably the reason. Just so you're aware. Having said that, <br>© Surya Jasper 2020<br>
           </p>
-          <!--button>Start Game</button>
-          <button>Leave Game</button-->
+          <div style = "display: none;" id = "gamebuttons">
+            <button id = "start">Start Game</button>
+            <button id = "leave">Leave Game</button>
+          </div>
         </header>
       </div>
     </div>

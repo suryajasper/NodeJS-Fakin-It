@@ -37,6 +37,14 @@ io.on('connection', function(socket){
     console.log('gameName: ' + gname);
   });
 
+  // playerLeaving
+
+  socket.on('playerLeaving', function(){
+    console.log('player left');
+    playerNames.remove(nameOfPlayer);
+    io.emit('newPlayerList', playerNames);
+  });
+
   socket.on('disconnect', function(){
     console.log('user disconnected');
     playerNames.remove(nameOfPlayer);

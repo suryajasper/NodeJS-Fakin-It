@@ -9,6 +9,12 @@ var lobby = document.getElementById('lobby');
 form.style.display = "block";
 lobby.style.display = "none";
 
+var gameButtons = document.querySelector('#gamebuttons');
+var footertext = document.querySelector('#disclaimer');
+
+var startButton = document.querySelector('#start');
+var leaveButton = document.querySelector('#leave');
+
 var plist = document.getElementById('playerlist');
 
 function refreshList(names) {
@@ -28,7 +34,16 @@ submitButton.onclick = function(e) {
   socket.emit('gameName', gameName.value);
   form.style.display = "none";
   lobby.style.display = "block";
-  console.log("WE DID IT ");
+  gameButtons.style.display = 'block';
+  footertext.style.display = 'none';
+
+  leaveButton.onclick = function() {
+    form.style.display = "block";
+    lobby.style.display = "none";
+    gameButtons.style.display = 'none';
+    footertext.style.display = 'block';
+    socket.emit('playerLeaving', playerName.value);
+  }
 }
 
 socket.on('newPlayerList', function(newPlayerList){
