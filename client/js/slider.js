@@ -26,4 +26,5 @@ async function timer(seconds) {
     await wait(seconds / 12);
   }
 }
+
 timer(5);

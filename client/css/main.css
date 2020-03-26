@@ -26,9 +26,21 @@ body {
 	color: #fff;
 	z-index: 100;
 }
+.footer-outer, .jbx-footer {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+  padding-top: 5px;
+  padding-bottom: 5px;
+	width: 100%;
+	background: #500e7d;
+	user-select: none;
+	color: #fff;
+	z-index: 100;
+}
 .Signin .jbg-header .jbg-top-logo {
 	height: 28px;
-	margin: 12px auto 0;
+	margin: 0 auto 12px;
 }
 form {
   background-color: #8511bb;
