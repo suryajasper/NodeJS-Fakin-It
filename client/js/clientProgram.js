@@ -1,4 +1,6 @@
-var submitButton = document.getElementById('submitButton');
+var createButton = document.getElementById('createButton');
+var joinButton = document.getElementById('joinButton');
+
 var playerName = document.getElementById('playerName');
 var gameName = document.getElementById('gameName');
 
@@ -17,6 +19,7 @@ var leaveButton = document.querySelector('#leave');
 var plist = document.getElementById('playerlist');
 
 function refreshList(names) {
+  socket.emit('print', 'refreshing list');
   $("#playerlist").empty();
   for (var i = 0; i < names.length; i++) {
     var li = document.createElement('li');
@@ -34,38 +37,45 @@ function setCookie(cookieText, exdays) {
   document.cookie = cookieText + expires + ";path=/";
 }
 
-submitButton.onclick = function(e) {
+createButton.onclick = function(e) {
   e.preventDefault();
-  socket.emit('playerName', playerName.value);
-  socket.emit('sending identity', playerName.value);
-  socket.emit('gameName', gameName.value);
+  socket.emit('createGame', {name: playerName.value, room: gameName.value});
+
   form.style.display = "none";
   lobby.style.display = "block";
   gameButtons.style.display = 'block';
   footertext.style.display = 'none';
+}
+joinButton.onclick = function(e) {
+  e.preventDefault();
+  socket.emit('createGame', {name: playerName.value, room: gameName.value});
 
-  socket.on('makeCookie', function(cookieText) {
-    setCookie(cookieText, 365);
-  });
+  form.style.display = "none";
+  lobby.style.display = "block";
+  gameButtons.style.display = 'block';
+  footertext.style.display = 'none';
+}
+socket.on('makeCookie', function(cookieText) {
+  setCookie(cookieText, 365);
+});
 
-  socket.on('redirect', function(destination) {
-    socket.emit('print', 'user is being redirected');
-    window.location.href = destination;
-  });
+socket.on('redirect', function(destination) {
+  socket.emit('print', 'user is being redirected');
+  window.location.href = destination;
+});
 
-  leaveButton.onclick = function() {
-    form.style.display = "block";
-    lobby.style.display = "none";
-    gameButtons.style.display = 'none';
-    footertext.style.display = 'block';
-    socket.emit('playerLeaving', playerName.value);
-  }
-  startButton.onclick = function() {
-    console.log('clicked');
-    socket.emit('randomize roles');
-    socket.emit('print', 'asking server to redirect');
-    socket.emit('redirect me to the game');
-  }
+leaveButton.onclick = function() {
+  form.style.display = "block";
+  lobby.style.display = "none";
+  gameButtons.style.display = 'none';
+  footertext.style.display = 'block';
+  socket.emit('playerLeaving', playerName.value);
+}
+startButton.onclick = function() {
+  console.log('clicked');
+  socket.emit('randomize roles');
+  socket.emit('print', 'asking server to redirect');
+  socket.emit('redirect me to the game');
 }
 
 socket.on('newPlayerList', function(newPlayerList){
