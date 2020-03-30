@@ -93,12 +93,12 @@ io.on('connection', function(socket){
     socket.emit('newGame', data.room);
 
     io.emit('makeCookie', 'username=' + data.name + ';');
-    console.log('playerName: ' + data.name);
+    console.log('playerName: ' + data.name + ' created room ' + playerRoomName);
     playerName = data.name;
     thisPlayer = new Player(data.name, socket.id, data.room);
     players[playerRoomName] = [];
     players[playerRoomName].push(thisPlayer);
-    socket.broadcast.to(playerRoomName).emit('newPlayerList', Player.stringify(players[playerRoomName]));
+    io.in(playerRoomName).emit('newPlayerList', Player.stringify(players[playerRoomName]));
   });
 
   socket.on('joinGame', function(data) {
@@ -113,9 +113,8 @@ io.on('connection', function(socket){
       console.log('playerName: ' + data.name);
       playerName = data.name;
       thisPlayer = new Player(data.name, socket.id, data.room);
-      players[playerRoomName] = [];
       players[playerRoomName].push(thisPlayer);
-      socket.broadcast.to(playerRoomName).emit('newPlayerList', Player.stringify(players[playerRoomName]));
+      io.in(playerRoomName).emit('newPlayerList', Player.stringify(players[playerRoomName]));
     }
     else {
       socket.emit('error', 'room "' + data.room + '" does not exist');
@@ -128,14 +127,14 @@ io.on('connection', function(socket){
 
   socket.on('playerLeaving', function(){
     console.log('player left');
-    players.remove(thisPlayer);
-    socket.broadcast.to(playerRoomName).emit('newPlayerList', Player.stringify(players));
+    players[playerRoomName].remove(thisPlayer);
+    io.in(playerRoomName).emit('newPlayerList', Player.stringify(players[playerRoomName]));
   });
 
   socket.on('disconnect', function(){
     console.log('user disconnected');
     players.remove(thisPlayer);
-    socket.broadcast.to(playerRoomName).emit('newPlayerList', Player.stringify(players));
+    io.in(playerRoomName).emit('newPlayerList', Player.stringify(players[playerRoomName]));
   });
 
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
@@ -144,7 +143,7 @@ io.on('connection', function(socket){
 
   socket.on('redirect me to the game', function(){
     var destination = '/game.html';
-    socket.broadcast.to(playerRoomName).emit('redirect', destination);
+    io.in(playerRoomName).emit('redirect', destination);
   });
 
   var randName;

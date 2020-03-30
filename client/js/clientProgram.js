@@ -48,7 +48,7 @@ createButton.onclick = function(e) {
 }
 joinButton.onclick = function(e) {
   e.preventDefault();
-  socket.emit('createGame', {name: playerName.value, room: gameName.value});
+  socket.emit('joinGame', {name: playerName.value, room: gameName.value});
 
   form.style.display = "none";
   lobby.style.display = "block";
