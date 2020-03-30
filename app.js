@@ -42,6 +42,14 @@ class Player {
     }
     return {name: playerList[lowestInd].name, score: playerList[lowestInd].score};
   }
+  static getRandomID(playerList) {
+    var randInd = Math.floor(Math.random() * playerList.length);
+    return playerList[randInd].id;
+  }
+  static getRandomName(playerList) {
+    var randInd = Math.floor(Math.random() * playerList.length);
+    return playerList[randInd].name;
+  }
 }
 
 Array.prototype.remove = function() {
@@ -85,6 +93,16 @@ io.on('connection', function(socket){
   var thisPlayer;
   var playerRoomName;
 
+  var disconnectFunc = function() {
+    try {
+      players[playerRoomName].remove(thisPlayer);
+      io.in(playerRoomName).emit('newPlayerList', Player.stringify(players[playerRoomName]));
+      console.log('logged in user disconnected successfully');
+    } catch (TypeError) {
+      console.log('anonymous user disconnected successfully');
+    }
+  }
+
   console.log('a user connected');
 
   socket.on('createGame', function(data) {
@@ -92,7 +110,8 @@ io.on('connection', function(socket){
     playerRoomName = data.room;
     socket.emit('newGame', data.room);
 
-    io.emit('makeCookie', 'username=' + data.name + ';');
+    socket.emit('makeCookie', 'username=' + data.name + ';');
+    socket.emit('makeCookie', 'room=' + data.room + ';');
     console.log('playerName: ' + data.name + ' created room ' + playerRoomName);
     playerName = data.name;
     thisPlayer = new Player(data.name, socket.id, data.room);
@@ -109,8 +128,9 @@ io.on('connection', function(socket){
       /*
       socket.broadcast.to(data.room).emit('player1', {});
       socket.emit('player2', {name: data.name, room: data.room })*/
-      io.emit('makeCookie', 'username=' + data.name + ';');
-      console.log('playerName: ' + data.name);
+      socket.emit('makeCookie', 'username=' + data.name + ';');
+      socket.emit('makeCookie', 'room=' + data.room + ';');
+      console.log('playerName: ' + data.name + ' joined room ' + playerRoomName);
       playerName = data.name;
       thisPlayer = new Player(data.name, socket.id, data.room);
       players[playerRoomName].push(thisPlayer);
@@ -125,18 +145,9 @@ io.on('connection', function(socket){
     console.log(toPrint);
   });
 
-  socket.on('playerLeaving', function(){
-    console.log('player left');
-    players[playerRoomName].remove(thisPlayer);
-    io.in(playerRoomName).emit('newPlayerList', Player.stringify(players[playerRoomName]));
-  });
-
-  socket.on('disconnect', function(){
-    console.log('user disconnected');
-    players.remove(thisPlayer);
-    io.in(playerRoomName).emit('newPlayerList', Player.stringify(players[playerRoomName]));
-  });
-
+  socket.on('playerLeaving', disconnectFunc);
+  socket.on('disconnect', disconnectFunc);
+  
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
   /*<<<<<<<<<<<<<<<<<<<<<<<ACTUAL GAME SERVER>>>>>>>>>>>>>>>>>>>>>>>>>*/
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
@@ -149,18 +160,27 @@ io.on('connection', function(socket){
   var randName;
 
   socket.on('randomize roles', function() {
-    console.log('RANDOMIZING ROLES with ' + clientID.length.toString() + ' clients.');
-    randName = Object.keys(nameToId)[Math.floor(Math.random() * Object.keys(nameToId).length)];
+    console.log('RANDOMIZING ROLES with ' + players[playerRoomName].length.toString() + ' clients.');
+    randName = Player.getRandomName(players[playerRoomName]);
     console.log('randName = ' + randName.toString());
   });
 
-  socket.on('sending identity', function(playername) {
-    nameToId[playername] = socket.id;
+  socket.on('sending identity', function(data) {
+    console.log('Room ' + data.room + ': received identity from ' + data.name);
+    var playerName = data.name;
+    playerRoomName = data.room;
+    for (var i = 0; i < players[playerRoomName].length; i++) {
+      if (players[playerRoomName][i].name === playerName) {
+        players[playerRoomName][i].id = socket.id;
+        thisPlayer = new Player(players[playerRoomName][i].name, socket.id, playerRoomName);
+        break;
+      }
+    }
   });
 
   socket.on('give me a role', function(){
     console.log('getting a role from id ' + socket.id.toString());
-    var currName = getKeyByValue(nameToId, socket.id);
+    var currName = thisPlayer.name;
     if (randName === currName) {
       socket.emit('get role', "Try to blend in!!!");
     } else {

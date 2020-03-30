@@ -76,7 +76,6 @@ leaveButton.onclick = function() {
   socket.emit('playerLeaving', playerName.value);
 }
 startButton.onclick = function() {
-  console.log('clicked');
   socket.emit('randomize roles');
   socket.emit('print', 'asking server to redirect');
   socket.emit('redirect me to the game');
