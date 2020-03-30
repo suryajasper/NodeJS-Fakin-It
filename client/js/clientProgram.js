@@ -1,3 +1,5 @@
+var socket = io();
+
 var createButton = document.getElementById('createButton');
 var joinButton = document.getElementById('joinButton');
 
@@ -64,8 +66,8 @@ socket.on('error', function(errorMsg) {
 });
 
 socket.on('redirect', function(destination) {
-  socket.emit('print', 'user is being redirected');
-  window.location.href = destination;
+  socket.emit('print', 'user is being redirected and his name is ' + playerName.value + ' room: ' + gameName.value);
+  window.location.href = destination + '?' + playerName.value + "&" + gameName.value;
 });
 
 leaveButton.onclick = function() {

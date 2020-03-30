@@ -11,7 +11,7 @@ async function wait(timeout) {
 
 function setToPercent(percent) {
   var ctx = slider.getContext("2d");
-  console.log('setting to ' + percent);
+  //console.log('setting to ' + percent);
   ctx.clearRect(0, 0, slider.width, slider.height);
   ctx.rect(0, 20, slider.width * (percent/100), slider.height);
   ctx.fillStyle = "rgb(187, 12, 180)";

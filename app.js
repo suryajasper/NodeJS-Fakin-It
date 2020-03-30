@@ -79,6 +79,7 @@ var io = require('socket.io')(http);
 
 var gameID = process.env.PORT || 2000;
 var players = {};
+var randPlayers = {};
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/client/index.html');
@@ -109,9 +110,9 @@ io.on('connection', function(socket){
     socket.join(data.room);
     playerRoomName = data.room;
     socket.emit('newGame', data.room);
-
+    /*
     socket.emit('makeCookie', 'username=' + data.name + ';');
-    socket.emit('makeCookie', 'room=' + data.room + ';');
+    socket.emit('makeCookie', 'room=' + data.room + ';');*/
     console.log('playerName: ' + data.name + ' created room ' + playerRoomName);
     playerName = data.name;
     thisPlayer = new Player(data.name, socket.id, data.room);
@@ -126,10 +127,8 @@ io.on('connection', function(socket){
       playerRoomName = data.room;
       socket.join(data.room);
       /*
-      socket.broadcast.to(data.room).emit('player1', {});
-      socket.emit('player2', {name: data.name, room: data.room })*/
       socket.emit('makeCookie', 'username=' + data.name + ';');
-      socket.emit('makeCookie', 'room=' + data.room + ';');
+      socket.emit('makeCookie', 'room=' + data.room + ';');*/
       console.log('playerName: ' + data.name + ' joined room ' + playerRoomName);
       playerName = data.name;
       thisPlayer = new Player(data.name, socket.id, data.room);
@@ -147,7 +146,7 @@ io.on('connection', function(socket){
 
   socket.on('playerLeaving', disconnectFunc);
   socket.on('disconnect', disconnectFunc);
-  
+
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
   /*<<<<<<<<<<<<<<<<<<<<<<<ACTUAL GAME SERVER>>>>>>>>>>>>>>>>>>>>>>>>>*/
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
@@ -157,33 +156,30 @@ io.on('connection', function(socket){
     io.in(playerRoomName).emit('redirect', destination);
   });
 
-  var randName;
-
   socket.on('randomize roles', function() {
     console.log('RANDOMIZING ROLES with ' + players[playerRoomName].length.toString() + ' clients.');
-    randName = Player.getRandomName(players[playerRoomName]);
-    console.log('randName = ' + randName.toString());
+    randPlayers[playerRoomName] = Player.getRandomName(players[playerRoomName]);
+    console.log('randName = ' + randPlayers[playerRoomName]);
   });
 
   socket.on('sending identity', function(data) {
     console.log('Room ' + data.room + ': received identity from ' + data.name);
-    var playerName = data.name;
     playerRoomName = data.room;
-    for (var i = 0; i < players[playerRoomName].length; i++) {
-      if (players[playerRoomName][i].name === playerName) {
-        players[playerRoomName][i].id = socket.id;
-        thisPlayer = new Player(players[playerRoomName][i].name, socket.id, playerRoomName);
-        break;
-      }
-    }
+    var playerName = data.name;
+    console.log(players[playerRoomName]);
+    console.log(data);
+    thisPlayer = new Player(playerName, socket.id, playerRoomName);
+    players[playerRoomName].push(thisPlayer);
   });
 
   socket.on('give me a role', function(){
-    console.log('getting a role from id ' + socket.id.toString());
+    console.log('getting a role for ' + thisPlayer.name + ' and the randname is ' + randPlayers[playerRoomName]);
     var currName = thisPlayer.name;
-    if (randName === currName) {
+    if (randPlayers[playerRoomName] === currName) {
+      console.log(currName + ' is the spy');
       socket.emit('get role', "Try to blend in!!!");
     } else {
+      console.log(currName + ' is normal');
       socket.emit('get role', "raise your hand if you're low iq")
     }
   });
