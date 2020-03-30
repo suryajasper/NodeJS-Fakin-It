@@ -1,9 +1,4 @@
 class Player {
-  constructor(name, id, room, score) {
-    this.name = name;
-    this.id = id;
-    this.score = score;
-  }
   constructor(name, id, room) {
     this.name = name;
     this.id = id;
@@ -75,7 +70,7 @@ var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 
 var gameID = process.env.PORT || 2000;
-var players = [];
+var players = {};
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/client/index.html');
@@ -88,34 +83,39 @@ io.on('connection', function(socket){
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
 
   var thisPlayer;
+  var playerRoomName;
 
   console.log('a user connected');
 
   socket.on('createGame', function(data) {
     socket.join(data.room);
+    playerRoomName = data.room;
     socket.emit('newGame', data.room);
 
-    //nameOfPlayer = data.name;
     io.emit('makeCookie', 'username=' + data.name + ';');
     console.log('playerName: ' + data.name);
     playerName = data.name;
     thisPlayer = new Player(data.name, socket.id, data.room);
-    players.push(thisPlayer);
-    io.emit('newPlayerList', Player.stringifyplayers(players));
+    players[playerRoomName] = [];
+    players[playerRoomName].push(thisPlayer);
+    socket.broadcast.to(playerRoomName).emit('newPlayerList', Player.stringify(players[playerRoomName]));
   });
 
   socket.on('joinGame', function(data) {
     var room = io.nsps['/'].adapter.rooms[data.room];
     if(room) {
+      playerRoomName = data.room;
       socket.join(data.room);
       /*
       socket.broadcast.to(data.room).emit('player1', {});
       socket.emit('player2', {name: data.name, room: data.room })*/
-      nameOfPlayer = data.name;
       io.emit('makeCookie', 'username=' + data.name + ';');
       console.log('playerName: ' + data.name);
-      playerNames.push(data.name);
-      io.emit('newPlayerList', playerNames);
+      playerName = data.name;
+      thisPlayer = new Player(data.name, socket.id, data.room);
+      players[playerRoomName] = [];
+      players[playerRoomName].push(thisPlayer);
+      socket.broadcast.to(playerRoomName).emit('newPlayerList', Player.stringify(players[playerRoomName]));
     }
     else {
       socket.emit('error', 'room "' + data.room + '" does not exist');
@@ -129,13 +129,13 @@ io.on('connection', function(socket){
   socket.on('playerLeaving', function(){
     console.log('player left');
     players.remove(thisPlayer);
-    io.emit('newPlayerList', Player.stringifyplayers(players));
+    socket.broadcast.to(playerRoomName).emit('newPlayerList', Player.stringify(players));
   });
 
   socket.on('disconnect', function(){
     console.log('user disconnected');
-    playerNames.remove(nameOfPlayer);
-    io.emit('newPlayerList', playerNames);
+    players.remove(thisPlayer);
+    socket.broadcast.to(playerRoomName).emit('newPlayerList', Player.stringify(players));
   });
 
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
@@ -143,10 +143,8 @@ io.on('connection', function(socket){
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
 
   socket.on('redirect me to the game', function(){
-    for (var i = 0; i < clientID.length; i++) {
-      var destination = '/game.html';
-      io.sockets.connected[clientID[i]].emit('redirect', destination);
-    }
+    var destination = '/game.html';
+    socket.broadcast.to(playerRoomName).emit('redirect', destination);
   });
 
   var randName;

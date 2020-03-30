@@ -59,6 +59,10 @@ socket.on('makeCookie', function(cookieText) {
   setCookie(cookieText, 365);
 });
 
+socket.on('error', function(errorMsg) {
+  window.alert(errorMsg);
+});
+
 socket.on('redirect', function(destination) {
   socket.emit('print', 'user is being redirected');
   window.location.href = destination;
@@ -80,4 +84,6 @@ startButton.onclick = function() {
 
 socket.on('newPlayerList', function(newPlayerList){
   refreshList(newPlayerList);
+  socket.emit('print', 'received a list');
+  socket.emit('print', newPlayerList);
 });
