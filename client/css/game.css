@@ -1,0 +1,32 @@
+h3 {
+  display: inline-block;
+  margin-left: 10px;
+  margin-right: 10px;
+  padding: 10px 10px 10px 10px;
+  background-color: rgb(60, 14, 150);
+  border-radius: 4px;
+}
+.colorchangeanim {
+  animation: ease infinite colorchange 25s;
+  -webkit-animation: ease infinite colorchange 25s; /* Chrome and Safari */
+}
+@keyframes colorchange
+{
+  0%   {background: red;}
+  12%  {background: magenta;}
+  25%  {background: blue;}
+  38%  {background: green;}
+  50% {background: red;}
+  62%  {background: green;}
+  75%  {background: blue;}
+  87%  {background: magenta;}
+  100%   {background: red;}
+}
+@keyframes colorchangetext
+{
+  0%   {color: rgb(37, 2, 2);}
+  25%  {color: rgb(90, 92, 8);}
+  50%  {color: rgb(0, 13, 84);}
+  75%  {color: rgb(7, 46, 22);}
+  100% {color: rgb(68, 15, 4);}
+}
