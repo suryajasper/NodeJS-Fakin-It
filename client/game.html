@@ -1,7 +1,7 @@
 <html>
   <head>
     <title>Fakin it</title>
-    <meta charset = "utf-8"></meta>
+    <meta charset = "utf-8" name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="images/jasperboxlogo.png">
     <script
 			  src="https://code.jquery.com/jquery-3.4.1.min.js"
@@ -24,9 +24,19 @@
         <h1 id = "prompt">joijoijoijoji</h1>
         <br><button id = "ready">Click when ready</button>
       </div>
-      <table id = "voting">
-        <h2 id = "votingprompt"></h2>
-      </table>
+      <div id = "voting" class = "centered">
+        <table>
+          <h2 id = "votingprompt"></h2>
+          <h2>Click on a player to vote</h3>
+          <tr id = "voterow">
+            <div class = "votecard">
+              <p>surya</p>
+              <div class = "votecardsuper">4</div>
+            </div>
+          </tr>
+          <br>
+        </table>
+      </div>
     </div>
     <script src = "js/clientGame.js"></script>
     <!--script src = "js/slider.js"></script-->
