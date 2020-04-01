@@ -5,8 +5,6 @@ h3 {
   padding: 10px 10px 10px 10px;
   background-color: rgb(60, 14, 150);
   border-radius: 4px;
-}
-.colorchangeanim {
   animation: ease infinite colorchange 25s;
   -webkit-animation: ease infinite colorchange 25s; /* Chrome and Safari */
 }
@@ -29,4 +27,11 @@ h3 {
   50%  {color: rgb(0, 13, 84);}
   75%  {color: rgb(7, 46, 22);}
   100% {color: rgb(68, 15, 4);}
+}
+.centered {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  /* bring your own prefixes */
+  transform: translate(-50%, -50%);
 }

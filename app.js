@@ -51,7 +51,6 @@ class Player {
     return playerList[randInd].name;
   }
 }
-
 Array.prototype.remove = function() {
   var what, a = arguments, L = a.length, ax;
   while (L && this.length) {
@@ -62,6 +61,11 @@ Array.prototype.remove = function() {
   }
   return this;
 };
+async function wait(timeout) {
+  return new Promise(resolve => {
+    setTimeout(resolve, timeout*1000);
+  });
+}
 
 function getKeyByValue(object, value) {
   for (var prop in object) {
@@ -80,6 +84,11 @@ var io = require('socket.io')(http);
 var gameID = process.env.PORT || 2000;
 var players = {};
 var randPlayers = {};
+var readyTracker = 0;
+
+var params = {
+  secondsUntilVote: 7
+}
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/client/index.html');
@@ -181,6 +190,15 @@ io.on('connection', function(socket){
     } else {
       console.log(currName + ' is normal');
       socket.emit('get role', "raise your hand if you're low iq")
+    }
+  });
+
+  socket.on('ready', function() {
+    readyTracker++;
+    if (readyTracker === players[playerRoomName].length) {
+      socket.emit('decision time');
+      wait(params.secondsUntilVote);
+      socket.emit('voting time');
     }
   });
 });
