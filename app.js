@@ -83,6 +83,8 @@ var io = require('socket.io')(http);
 
 var gameID = process.env.PORT || 2000;
 var players = {};
+var playerVotes = {};
+var playerVoteDecisions = {};
 var randPlayers = {};
 var readyTracker = 0;
 
@@ -198,8 +200,29 @@ io.on('connection', function(socket){
     if (readyTracker === players[playerRoomName].length) {
       socket.emit('decision time');
       wait(params.secondsUntilVote);
+      playerVotes[playerRoomName] = {};
+      playerVoteDecisions[playerRoomName] = {};
+      for (var i = 0; i < players[playerRoomName].length; i++) {
+        playerVotes[playerRoomName][players[playerRoomName][i].name] = 0;
+        playerVoteDecisions[playerRoomName][players[playerRoomName][i].name] = null;
+      }
       socket.emit('voting time');
     }
+  });
+
+  socket.on('voting for', function(toVote) {
+    if (playerVoteDecisions[playerRoomName][thisPlayer.name] == null) {
+      playerVoteDecisions[playerRoomName][thisPlayer.name] = toVote;
+      playerVotes[playerRoomName][toVote]++;
+    } else if (playerVoteDecisions[playerRoomName][thisPlayer.name] == toVote) {
+      playerVoteDecisions[playerRoomName][thisPlayer.name] = null;
+      playerVotes[playerRoomName][toVote]--;
+    } else {
+      playerVotes[playerRoomName][toVote]++;
+      playerVotes[playerRoomName][playerVoteDecisions[playerRoomName][thisPlayer.name]]--;
+      playerVoteDecisions[playerRoomName][thisPlayer.name] = toVote;
+    }
+    socket.emit('refresh votes', playerVotes[playerRoomName]);
   });
 });
 
