@@ -80,10 +80,12 @@ var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
-
+app.use(express.static(__dirname + '/client'));
 var gameID = process.env.PORT || 2000;
-var players = {};
+
+var players = {}; // a dictionary that stores a list of player objects (which stores their name and socket id) for each room
 var playerVotes = {};
+var playerSockets = {};
 var playerVoteDecisions = {};
 var randPlayers = {};
 var readyTracker = 0;
@@ -91,11 +93,10 @@ var readyTracker = 0;
 var params = {
   secondsUntilVote: 7
 }
-
+/*
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/client/index.html');
-});
-app.use(express.static(__dirname + '/client'));
+});*/
 
 io.on('connection', function(socket){
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
@@ -181,6 +182,10 @@ io.on('connection', function(socket){
     console.log(data);
     thisPlayer = new Player(playerName, socket.id, playerRoomName);
     players[playerRoomName].push(thisPlayer);
+    if (!(playerRoomName in playerSockets)) {
+      playerSockets[playerRoomName] = [];
+    }
+    playerSockets[playerRoomName].push(socket);
   });
 
   socket.on('give me a role', function(){
@@ -195,10 +200,21 @@ io.on('connection', function(socket){
     }
   });
 
+  var sendToAll = (room, header, data) => {
+    for (var i = 0; i < playerSockets[room].length; i++) {
+      if (data == null) {
+        playerSockets[room][i].emit(header);
+      } else {
+        playerSockets[room][i].emit(header, data);
+      }
+    }
+  }
+
   socket.on('ready', function() {
     readyTracker++;
     if (readyTracker === players[playerRoomName].length) {
-      socket.emit('decision time');
+      console.log('we bout to start waitin');
+      sendToAll(playerRoomName, 'decision time');
       wait(params.secondsUntilVote);
       playerVotes[playerRoomName] = {};
       playerVoteDecisions[playerRoomName] = {};
@@ -206,7 +222,13 @@ io.on('connection', function(socket){
         playerVotes[playerRoomName][players[playerRoomName][i].name] = 0;
         playerVoteDecisions[playerRoomName][players[playerRoomName][i].name] = null;
       }
-      socket.emit('voting time');
+      console.log(io.in(playerRoomName));
+      var listOfPlayerNames = [];
+      for (var i = 0; i < players[playerRoomName].length; i++) {
+        listOfPlayerNames.push(players[playerRoomName][i].name);
+      }
+      sendToAll(playerRoomName, 'voting time', listOfPlayerNames);
+      console.log('we be done waitin');
     }
   });
 
@@ -222,7 +244,7 @@ io.on('connection', function(socket){
       playerVotes[playerRoomName][playerVoteDecisions[playerRoomName][thisPlayer.name]]--;
       playerVoteDecisions[playerRoomName][thisPlayer.name] = toVote;
     }
-    socket.emit('refresh votes', playerVotes[playerRoomName]);
+    sendToAll(playerRoomName, 'refresh votes', playerVotes[playerRoomName]);
   });
 });
 

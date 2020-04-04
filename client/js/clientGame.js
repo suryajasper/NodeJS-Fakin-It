@@ -1,3 +1,5 @@
+var roleDiv = document.querySelector('#role');
+
 var roleOut = document.querySelector('#prompt');
 var voting = document.querySelector('#voting');
 var votingRow = document.querySelector('#voterow');
@@ -5,7 +7,7 @@ var readyButton = document.getElementById('ready');
 var socket = io();
 
 voting.style.display = "none";
-roleOut.style.display = "block";
+role.style.display = "block";
 
 var toParse = window.location.href.split('?')[1].split('&');
 var thisName = toParse[0];
@@ -28,26 +30,31 @@ function getCookie(cname) {
 
 function organizeNames(names) {
   var voteDict = {};
-  for (var i = 0; i < names.length; i++) {
+  for (var i = 0; i < names.length; i++) (function(i) {
+    var toVote = names[i];
     var votecard = document.createElement('div');
     votecard.classList.add("votecard");
     votecard.innerHTML = "<p>" + names[i] + "</p>";
     var votecardsuper = document.createElement('div');
     votecardsuper.classList.add("votecardsuper");
     votecardsuper.innerHTML = 0;
+    voteDict[toVote] = votecardsuper;
     votecard.onclick = function() {
-      var toVote = names[i];
+      console.log('registering onclick with iteration ' + i.toString());
       socket.emit('voting for', toVote);
-      voteDict[toVote] = votecardsuper;
     }
     votecard.appendChild(votecardsuper);
     votingRow.appendChild(votecard);
-  }
+  })(i);
   socket.on('refresh votes', function(servdict) {
-    for (var i = 0; i < Object.keys(servdict).length; i++) {
+    for (var i = 0; i < Object.keys(servdict).length; i++) (function(i) {
       var currServName = Object.keys(servdict)[i];
-      voteDict[currServName].innerHTML = servdict[currServName].toString();
-    }
+      console.log(currServName);
+      console.log(voteDict);
+      if (currServName in voteDict) {
+        voteDict[currServName].innerHTML = servdict[currServName].toString();
+      }
+    })(i)
   });
   votingRow.appendChild(document.createElement('br'));
 }
@@ -70,8 +77,10 @@ readyButton.onclick = function() {
 }
 
 socket.on('voting time', function(names) {
+  socket.emit('print', thisName + ' has just received the names and will vote soon');
+
   voting.style.display = "block";
-  roleOut.style.display = "none";
+  role.style.display = "none";
 
   organizeNames(names);
 });
