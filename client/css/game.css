@@ -5,6 +5,12 @@
   margin-right: 10px;
   font-size: 20px;
   font-family: Helvetica,"sans-serif";
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Safari */
+  -khtml-user-select: none;    /* Konqueror HTML */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently supported by Chrome and Opera */
   padding: 10px 10px 10px 10px;
   background-color: rgb(60, 14, 150);
   border-radius: 4px;
@@ -51,4 +57,10 @@
   text-align: center;
   background-color: rgb(187, 35, 209);
   color: white;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Safari */
+  -khtml-user-select: none;    /* Konqueror HTML */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently supported by Chrome and Opera */
 }

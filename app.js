@@ -88,15 +88,25 @@ var playerVotes = {};
 var playerSockets = {};
 var playerVoteDecisions = {};
 var randPlayers = {};
-var readyTracker = 0;
+var readyTracker = {};
 
 var params = {
-  secondsUntilVote: 7
+  numRounds: 5,
+  numRoundsInRound: 3,
+  secondsUntilVote: 7,
+  secondsToVote: 20
 }
 /*
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/client/index.html');
 });*/
+
+function resetVarsForRound(room) {
+  readyTracker[room] = 0;
+  randPlayers[room] = undefined;
+  playerVoteDecisions[room] = {};
+  playerVotes[room] = {};
+}
 
 io.on('connection', function(socket){
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
@@ -121,7 +131,6 @@ io.on('connection', function(socket){
   socket.on('createGame', function(data) {
     socket.join(data.room);
     playerRoomName = data.room;
-    socket.emit('newGame', data.room);
     /*
     socket.emit('makeCookie', 'username=' + data.name + ';');
     socket.emit('makeCookie', 'room=' + data.room + ';');*/
@@ -171,6 +180,7 @@ io.on('connection', function(socket){
   socket.on('randomize roles', function() {
     console.log('RANDOMIZING ROLES with ' + players[playerRoomName].length.toString() + ' clients.');
     randPlayers[playerRoomName] = Player.getRandomName(players[playerRoomName]);
+    readyTracker[playerRoomName] = 0;
     console.log('randName = ' + randPlayers[playerRoomName]);
   });
 
@@ -178,8 +188,6 @@ io.on('connection', function(socket){
     console.log('Room ' + data.room + ': received identity from ' + data.name);
     playerRoomName = data.room;
     var playerName = data.name;
-    console.log(players[playerRoomName]);
-    console.log(data);
     thisPlayer = new Player(playerName, socket.id, playerRoomName);
     players[playerRoomName].push(thisPlayer);
     if (!(playerRoomName in playerSockets)) {
@@ -195,7 +203,6 @@ io.on('connection', function(socket){
       console.log(currName + ' is the spy');
       socket.emit('get role', "Try to blend in!!!");
     } else {
-      console.log(currName + ' is normal');
       socket.emit('get role', "raise your hand if you're low iq")
     }
   });
@@ -214,21 +221,42 @@ io.on('connection', function(socket){
     readyTracker++;
     if (readyTracker === players[playerRoomName].length) {
       console.log('we bout to start waitin');
-      sendToAll(playerRoomName, 'decision time');
-      wait(params.secondsUntilVote);
-      playerVotes[playerRoomName] = {};
-      playerVoteDecisions[playerRoomName] = {};
-      for (var i = 0; i < players[playerRoomName].length; i++) {
-        playerVotes[playerRoomName][players[playerRoomName][i].name] = 0;
-        playerVoteDecisions[playerRoomName][players[playerRoomName][i].name] = null;
-      }
-      console.log(io.in(playerRoomName));
-      var listOfPlayerNames = [];
-      for (var i = 0; i < players[playerRoomName].length; i++) {
-        listOfPlayerNames.push(players[playerRoomName][i].name);
-      }
-      sendToAll(playerRoomName, 'voting time', listOfPlayerNames);
-      console.log('we be done waitin');
+      sendToAll(playerRoomName, 'decision time', null);
+      var promise = wait(params.secondsUntilVote);
+      promise.then(function() {
+        playerVotes[playerRoomName] = {};
+        playerVoteDecisions[playerRoomName] = {};
+        for (var i = 0; i < players[playerRoomName].length; i++) {
+          playerVotes[playerRoomName][players[playerRoomName][i].name] = 0;
+          playerVoteDecisions[playerRoomName][players[playerRoomName][i].name] = null;
+        }
+        var listOfPlayerNames = [];
+        for (var i = 0; i < players[playerRoomName].length; i++) {
+          listOfPlayerNames.push(players[playerRoomName][i].name);
+        }
+        sendToAll(playerRoomName, 'voting time', listOfPlayerNames);
+        console.log('we be done waitin');
+
+        var toVotePromise = wait(params.secondsToVote);
+        toVotePromise.then(function() {
+          var foundLargest = false;
+          Object.keys(playerVotes[playerRoomName]).forEach(function(voteName) {
+            var voteTally = playerVotes[playerRoomName][voteName];
+            console.log(voteName, voteTally);
+            if (voteTally >= players[playerRoomName].length-1) {
+              if (voteName === randPlayers[playerRoomName]) {
+                sendToAll(playerRoomName, 'vote result', {pick: voteName, result: 'IS the faker'});
+              } else {
+                sendToAll(playerRoomName, 'vote result', {pick: voteName, result: 'is NOT the faker'});
+              }
+              foundLargest = true;
+            }
+          });
+          if (!foundLargest) {
+            sendToAll(playerRoomName, 'vote result', {pick: 'The faker', result: 'is still at large'});
+          }
+        })
+      })
     }
   });
 

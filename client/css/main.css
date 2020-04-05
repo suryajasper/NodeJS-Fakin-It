@@ -75,6 +75,9 @@ p {
   margin-top: 0px;
   margin-bottom: 0px;
 }
+#disclaimer {
+  font-size: 1.3vmin;
+}
 
 input:hover {
   background-color:#525257;

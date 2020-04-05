@@ -6,7 +6,12 @@ var votingRow = document.querySelector('#voterow');
 var readyButton = document.getElementById('ready');
 var socket = io();
 
+var votingResults = document.querySelector('#votingResults');
+var votedName = document.querySelector('#votedName');
+var votedNameResult = document.querySelector('#votedNameResult');
+
 voting.style.display = "none";
+votingResults.style.display = 'none';
 role.style.display = "block";
 
 var toParse = window.location.href.split('?')[1].split('&');
@@ -80,7 +85,17 @@ socket.on('voting time', function(names) {
   socket.emit('print', thisName + ' has just received the names and will vote soon');
 
   voting.style.display = "block";
+  votingResults.style.display = 'none';
   role.style.display = "none";
 
   organizeNames(names);
+});
+
+socket.on('vote result', function(data) {
+  voting.style.display = "none";
+  role.style.display = "none";
+  votingResults.style.display = 'block';
+
+  votedName.innerHTML = data.pick;
+  votedNameResult.innerHTML = data.result;
 });
