@@ -51,6 +51,7 @@ class Player {
     return playerList[randInd].name;
   }
 }
+
 Array.prototype.remove = function() {
   var what, a = arguments, L = a.length, ax;
   while (L && this.length) {
@@ -106,6 +107,23 @@ function resetVarsForRound(room) {
   randPlayers[room] = undefined;
   playerVoteDecisions[room] = {};
   playerVotes[room] = {};
+}
+
+function randomizeRoles(room) {
+  console.log('RANDOMIZING ROLES with ' + players[room].length.toString() + ' clients.');
+  randPlayers[room] = Player.getRandomName(players[room]);
+  readyTracker[room] = 0;
+  console.log('randName = ' + randPlayers[room]);
+}
+
+function sendToAll(room, header, data) {
+  for (var i = 0; i < playerSockets[room].length; i++) {
+    if (data == null) {
+      playerSockets[room][i].emit(header);
+    } else {
+      playerSockets[room][i].emit(header, data);
+    }
+  }
 }
 
 io.on('connection', function(socket){
@@ -178,10 +196,7 @@ io.on('connection', function(socket){
   });
 
   socket.on('randomize roles', function() {
-    console.log('RANDOMIZING ROLES with ' + players[playerRoomName].length.toString() + ' clients.');
-    randPlayers[playerRoomName] = Player.getRandomName(players[playerRoomName]);
-    readyTracker[playerRoomName] = 0;
-    console.log('randName = ' + randPlayers[playerRoomName]);
+    randomizeRoles[playerRoomName];
   });
 
   socket.on('sending identity', function(data) {
@@ -206,16 +221,6 @@ io.on('connection', function(socket){
       socket.emit('get role', "raise your hand if you're low iq")
     }
   });
-
-  var sendToAll = (room, header, data) => {
-    for (var i = 0; i < playerSockets[room].length; i++) {
-      if (data == null) {
-        playerSockets[room][i].emit(header);
-      } else {
-        playerSockets[room][i].emit(header, data);
-      }
-    }
-  }
 
   socket.on('ready', function() {
     readyTracker++;
