@@ -69,17 +69,37 @@ function organizeNames(names) {
 socket.emit('sending identity', {name: toParse[0], room: toParse[1]});
 socket.emit('give me a role');
 socket.on('get role', function(newRole){
+  voting.style.display = "none";
+  votingResults.style.display = 'none';
+  role.style.display = "block";
   roleOut.innerHTML = newRole;
 });
 
+function clickReady(bool) {
+  if (bool) {
+    $('#ready').attr('disabled', true);
+    readyButton.style.backgroundColor = '#0d900b';
+    readyButton.style.color = '#ffffff';
+    readyButton.innerHTML = 'Ready';
+  }
+  else {
+    $('#ready').attr('disabled', false);
+    readyButton.style.backgroundColor = '#e3e5e8';
+    readyButton.style.color = '#000000';
+    readyButton.innerHTML = 'Click when ready';
+  }
+}
+
 readyButton.onclick = function() {
   console.log('clicked');
-  $('#ready').attr('disabled','disabled');
-  readyButton.style.backgroundColor = '#0d900b';
-  readyButton.style.color = '#ffffff';
-  readyButton.innerHTML = 'Ready';
+  clickReady(true);
   socket.emit('ready');
 }
+
+socket.on('update round info', function(roundData) {
+  document.querySelector('#roundInfo').innerHTML = 'Trial ' + roundData.currTrial.toString() + '/' + roundData.totalTrials.toString() + ' & Round ' + roundData.currRound.toString() + '/' + roundData.totalRounds.toString();
+  clickReady(false);
+});
 
 socket.on('voting time', function(names) {
   socket.emit('print', thisName + ' has just received the names and will vote soon');

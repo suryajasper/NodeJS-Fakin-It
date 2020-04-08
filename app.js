@@ -90,6 +90,7 @@ var playerSockets = {};
 var playerVoteDecisions = {};
 var randPlayers = {};
 var readyTracker = {};
+var roundInfo = {};
 
 var params = {
   numRounds: 5,
@@ -192,11 +193,12 @@ io.on('connection', function(socket){
 
   socket.on('redirect me to the game', function(){
     var destination = '/game.html';
+    roundInfo[playerRoomName] = {currRound: 1, totalRounds: params.numRounds, currTrial: 1, totalTrials: 3};
     io.in(playerRoomName).emit('redirect', destination);
   });
 
   socket.on('randomize roles', function() {
-    randomizeRoles[playerRoomName];
+    randomizeRoles(playerRoomName);
   });
 
   socket.on('sending identity', function(data) {
@@ -209,6 +211,7 @@ io.on('connection', function(socket){
       playerSockets[playerRoomName] = [];
     }
     playerSockets[playerRoomName].push(socket);
+    socket.emit('update round info', roundInfo[playerRoomName]);
   });
 
   socket.on('give me a role', function(){
@@ -223,8 +226,9 @@ io.on('connection', function(socket){
   });
 
   socket.on('ready', function() {
-    readyTracker++;
-    if (readyTracker === players[playerRoomName].length) {
+    readyTracker[playerRoomName]++;
+    console.log('(' + playerRoomName + ') ' + readyTracker[playerRoomName].toString() + '/' + players[playerRoomName].length.toString() + ' are ready');
+    if (readyTracker[playerRoomName] === players[playerRoomName].length) {
       console.log('we bout to start waitin');
       sendToAll(playerRoomName, 'decision time', null);
       var promise = wait(params.secondsUntilVote);
@@ -260,7 +264,22 @@ io.on('connection', function(socket){
           if (!foundLargest) {
             sendToAll(playerRoomName, 'vote result', {pick: 'The faker', result: 'is still at large'});
           }
-        })
+          roundInfo[playerRoomName].currTrial++;
+          if (roundInfo[playerRoomName].currTrial > roundInfo[playerRoomName].totalTrials) {
+            roundInfo[playerRoomName].currRound++;
+            roundInfo[playerRoomName].currTrial = 1;
+          }
+          randomizeRoles(playerRoomName);
+          sendToAll(playerRoomName, 'update round info', roundInfo[playerRoomName]);
+          console.log('getting a role for ' + thisPlayer.name + ' and the randname is ' + randPlayers[playerRoomName]);
+          var currName = thisPlayer.name;
+          if (randPlayers[playerRoomName] === currName) {
+            console.log(currName + ' is the spy');
+            sendToAll(playerRoomName, 'get role', "Try to blend in!!!");
+          } else {
+            sendToAll(playerRoomName, 'get role', "raise your hand if you're low iq")
+          }
+        })
       })
     }
   });

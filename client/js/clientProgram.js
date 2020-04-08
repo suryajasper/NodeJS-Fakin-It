@@ -57,6 +57,7 @@ joinButton.onclick = function(e) {
   gameButtons.style.display = 'block';
   footertext.style.display = 'none';
 }
+
 socket.on('makeCookie', function(cookieText) {
   setCookie(cookieText, 365);
 });
