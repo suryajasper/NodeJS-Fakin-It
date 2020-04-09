@@ -118,6 +118,12 @@ function randomizeRoles(room) {
   console.log('randName = ' + randPlayers[room]);
 }
 
+function printScores(roomName) {
+  for (var i = 0; i < players[roomName].length; i++) {
+    console.log(players[roomName][i].name + ": " + players[roomName][i].score.toString() + ' points');
+  }
+}
+
 function sendToAll(room, header, data) {
   for (var i = 0; i < playerSockets[room].length; i++) {
     if (data == null) {
@@ -251,6 +257,18 @@ io.on('connection', function(socket){
         toVotePromise.then(function() {
           var foundFaker = false;
           var foundLargest = false;
+          /* Give points to whoever guessed correctly */
+          for (var i = 0; i < Object.keys(playerVoteDecisions[playerRoomName]).length; i++) {
+            var playerWhoDecided = Object.keys(playerVoteDecisions[playerRoomName])[i];
+            var tempDecision = playerVoteDecisions[playerRoomName][playerWhoDecided];
+            if (tempDecision === randPlayers[playerRoomName]) {
+              for (var j = 0; j < players[playerRoomName].length; j++) {
+                if (players[playerRoomName][j].name === playerWhoDecided) {
+                  players[playerRoomName][j].addPoints(100);
+                }
+              }
+            }
+          }
           Object.keys(playerVotes[playerRoomName]).forEach(function(voteName) {
             var voteTally = playerVotes[playerRoomName][voteName];
             console.log(voteName, voteTally);
@@ -259,15 +277,28 @@ io.on('connection', function(socket){
                 sendToAll(playerRoomName, 'vote result', {pick: voteName, result: 'IS the faker'});
                 foundFaker = true;
               } else {
+                for (var pInd = 0; pInd < players[playerRoomName].length; pInd++) {
+                  if (players[playerRoomName][pInd].name === randPlayers[playerRoomName]) {
+                    players[playerRoomName][pInd].addPoints(150);
+                    break;
+                  }
+                }
                 sendToAll(playerRoomName, 'vote result', {pick: voteName, result: 'is NOT the faker'});
               }
               foundLargest = true;
             }
           });
           if (!foundLargest) {
+            for (var pInd = 0; pInd < players[playerRoomName].length; pInd++) {
+              if (players[playerRoomName][pInd].name === randPlayers[playerRoomName]) {
+                players[playerRoomName][pInd].addPoints(75);
+                break;
+              }
+            }
             sendToAll(playerRoomName, 'vote result', {pick: 'The faker', result: 'is still at large'});
           }
           roundInfo[playerRoomName].currTrial++;
+          printScores(playerRoomName);
           if (foundFaker || (roundInfo[playerRoomName].currTrial > roundInfo[playerRoomName].totalTrials)) {
             roundInfo[playerRoomName].currRound++;
             roundInfo[playerRoomName].currTrial = 1;
