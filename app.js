@@ -62,6 +62,7 @@ Array.prototype.remove = function() {
   }
   return this;
 };
+
 async function wait(timeout) {
   return new Promise(resolve => {
     setTimeout(resolve, timeout*1000);
@@ -248,6 +249,7 @@ io.on('connection', function(socket){
 
         var toVotePromise = wait(params.secondsToVote);
         toVotePromise.then(function() {
+          var foundFaker = false;
           var foundLargest = false;
           Object.keys(playerVotes[playerRoomName]).forEach(function(voteName) {
             var voteTally = playerVotes[playerRoomName][voteName];
@@ -255,6 +257,7 @@ io.on('connection', function(socket){
             if (voteTally >= players[playerRoomName].length-1) {
               if (voteName === randPlayers[playerRoomName]) {
                 sendToAll(playerRoomName, 'vote result', {pick: voteName, result: 'IS the faker'});
+                foundFaker = true;
               } else {
                 sendToAll(playerRoomName, 'vote result', {pick: voteName, result: 'is NOT the faker'});
               }
@@ -265,19 +268,28 @@ io.on('connection', function(socket){
             sendToAll(playerRoomName, 'vote result', {pick: 'The faker', result: 'is still at large'});
           }
           roundInfo[playerRoomName].currTrial++;
-          if (roundInfo[playerRoomName].currTrial > roundInfo[playerRoomName].totalTrials) {
+          if (foundFaker || (roundInfo[playerRoomName].currTrial > roundInfo[playerRoomName].totalTrials)) {
             roundInfo[playerRoomName].currRound++;
             roundInfo[playerRoomName].currTrial = 1;
-          }
-          randomizeRoles(playerRoomName);
-          sendToAll(playerRoomName, 'update round info', roundInfo[playerRoomName]);
-          console.log('getting a role for ' + thisPlayer.name + ' and the randname is ' + randPlayers[playerRoomName]);
-          var currName = thisPlayer.name;
-          if (randPlayers[playerRoomName] === currName) {
-            console.log(currName + ' is the spy');
-            sendToAll(playerRoomName, 'get role', "Try to blend in!!!");
-          } else {
-            sendToAll(playerRoomName, 'get role', "raise your hand if you're low iq")
+            randomizeRoles(playerRoomName);
+            var toNextRoundPromise = wait(7);
+            toNextRoundPromise.then(function() {
+              sendToAll(playerRoomName, 'update round info', roundInfo[playerRoomName]);
+              console.log('getting roles for everyone');
+              for (var i = 0; i < players[playerRoomName].length; i++) {
+                if (players[playerRoomName][i].name === randPlayers[playerRoomName]) {
+                  for (var j = 0; j < playerSockets[playerRoomName].length; j++) {
+                    if (playerSockets[playerRoomName][j].id === players[playerRoomName][i].id) {
+                      playerSockets[playerRoomName][j].emit('get role', "Try to blend in!!!");
+                    }
+                    else {
+                      playerSockets[playerRoomName][j].emit('get role', "raise your hand if you're low iq");
+                    }
+                  }
+                  break;
+                }
+              }
+            })
           }
         })
       })

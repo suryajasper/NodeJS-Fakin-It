@@ -34,6 +34,7 @@ function getCookie(cname) {
 }
 
 function organizeNames(names) {
+  $('#voterow').empty();
   var voteDict = {};
   for (var i = 0; i < names.length; i++) (function(i) {
     var toVote = names[i];
