@@ -64,3 +64,13 @@
   -ms-user-select: none;       /* Internet Explorer/Edge */
   user-select: none;           /* Non-prefixed version, currently supported by Chrome and Opera */
 }
+#playerScores table {
+  border-spacing: 0 15px;
+}
+#playerScores table tbody tr td {
+  width: 49%;
+  display: inline-block;
+}
+#playerScores table tbody tr td h3, p {
+  margin-bottom: 0px;
+}

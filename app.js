@@ -111,6 +111,18 @@ function resetVarsForRound(room) {
   playerVotes[room] = {};
 }
 
+function getScoreDict(room) {
+  var dictToReturn = {};
+  for (var player of players[room]) {
+    for (var i = 0; i < players[room].length; i++) {
+      if (players[room][i].name === player.name) {
+        dictToReturn[player.name] = players[room][i].score;
+      }
+    }
+  }
+  return dictToReturn;
+}
+
 function randomizeRoles(room) {
   console.log('RANDOMIZING ROLES with ' + players[room].length.toString() + ' clients.');
   randPlayers[room] = Player.getRandomName(players[room]);
@@ -295,31 +307,50 @@ io.on('connection', function(socket){
                 break;
               }
             }
-            sendToAll(playerRoomName, 'vote result', {pick: 'The faker', result: 'is still at large'});
+            if (roundInfo[playerRoomName].currTrial === roundInfo[playerRoomName].totalTrials) {
+              sendToAll(playerRoomName, 'vote result', {pick: randPlayers[playerRoomName], result: 'evaded capture'});
+            } else {
+              sendToAll(playerRoomName, 'vote result', {pick: 'The faker', result: 'is still at large'});
+            }
           }
           roundInfo[playerRoomName].currTrial++;
           printScores(playerRoomName);
+          var sendEveryoneTheirRoles = function() {
+            for (var i = 0; i < players[playerRoomName].length; i++) {
+              if (players[playerRoomName][i].name === randPlayers[playerRoomName]) {
+                for (var j = 0; j < playerSockets[playerRoomName].length; j++) {
+                  if (playerSockets[playerRoomName][j].id === players[playerRoomName][i].id) {
+                    playerSockets[playerRoomName][j].emit('get role', "Try to blend in!!!");
+                  }
+                  else {
+                    playerSockets[playerRoomName][j].emit('get role', "raise your hand if you're low iq");
+                  }
+                }
+                break;
+              }
+            }
+          }
+          readyTracker[playerRoomName] = 0;
           if (foundFaker || (roundInfo[playerRoomName].currTrial > roundInfo[playerRoomName].totalTrials)) {
-            roundInfo[playerRoomName].currRound++;
-            roundInfo[playerRoomName].currTrial = 1;
-            randomizeRoles(playerRoomName);
+            var toScoreView = wait(7);
+            toScoreView.then(function() {
+              var playerScoreDict = getScoreDict(playerRoomName);
+              sendToAll(playerRoomName, 'display scores', playerScoreDict);
+              roundInfo[playerRoomName].currRound++;
+              roundInfo[playerRoomName].currTrial = 1;
+              randomizeRoles(playerRoomName);
+              var toNextRoundPromise = wait(7);
+              toNextRoundPromise.then(function() {
+                sendToAll(playerRoomName, 'update round info', roundInfo[playerRoomName]);
+                console.log('getting roles for everyone');
+                sendEveryoneTheirRoles();
+              })
+            })
+          } else {
             var toNextRoundPromise = wait(7);
             toNextRoundPromise.then(function() {
               sendToAll(playerRoomName, 'update round info', roundInfo[playerRoomName]);
-              console.log('getting roles for everyone');
-              for (var i = 0; i < players[playerRoomName].length; i++) {
-                if (players[playerRoomName][i].name === randPlayers[playerRoomName]) {
-                  for (var j = 0; j < playerSockets[playerRoomName].length; j++) {
-                    if (playerSockets[playerRoomName][j].id === players[playerRoomName][i].id) {
-                      playerSockets[playerRoomName][j].emit('get role', "Try to blend in!!!");
-                    }
-                    else {
-                      playerSockets[playerRoomName][j].emit('get role', "raise your hand if you're low iq");
-                    }
-                  }
-                  break;
-                }
-              }
+              sendEveryoneTheirRoles();
             })
           }
         })

@@ -10,6 +10,10 @@ var votingResults = document.querySelector('#votingResults');
 var votedName = document.querySelector('#votedName');
 var votedNameResult = document.querySelector('#votedNameResult');
 
+var playerScores = document.querySelector('#playerScores');
+var playerScoresTbody = document.querySelector('#playerScoreBody');
+
+playerScores.style.display = 'none';
 voting.style.display = "none";
 votingResults.style.display = 'none';
 role.style.display = "block";
@@ -31,6 +35,38 @@ function getCookie(cname) {
     }
   }
   return null;
+}
+
+function createScoreElement(name, score) {
+  var tr = document.createElement('tr');
+
+  var nameTD = document.createElement('td');
+  var nameTDh3 = document.createElement('h3');
+  nameTDh3.innerHTML = name;
+  nameTD.appendChild(nameTDh3);
+  nameTD.setAttribute('align', 'left');
+
+  var scoreTD = document.createElement('td');
+  var scoreTDh3 = document.createElement('h3');
+  scoreTDh3.innerHTML = score;
+  scoreTD.appendChild(scoreTDh3);
+  scoreTD.setAttribute('align', 'right');
+
+  tr.appendChild(nameTD);
+  tr.appendChild(scoreTD);
+
+  return tr;
+}
+
+function displayScores(scoreDict) {
+  playerScores.style.display = 'block';
+  voting.style.display = "none";
+  votingResults.style.display = 'none';
+  role.style.display = "none";
+  $('#playerScoreBody').empty();
+  for (var i = 0; i < Object.keys(scoreDict).length; i++) {
+    playerScoresTbody.appendChild(createScoreElement(Object.keys(scoreDict)[i], scoreDict[Object.keys(scoreDict)[i]]));
+  }
 }
 
 function organizeNames(names) {
@@ -70,6 +106,7 @@ function organizeNames(names) {
 socket.emit('sending identity', {name: toParse[0], room: toParse[1]});
 socket.emit('give me a role');
 socket.on('get role', function(newRole){
+  playerScores.style.display = 'none';
   voting.style.display = "none";
   votingResults.style.display = 'none';
   role.style.display = "block";
@@ -105,6 +142,7 @@ socket.on('update round info', function(roundData) {
 socket.on('voting time', function(names) {
   socket.emit('print', thisName + ' has just received the names and will vote soon');
 
+  playerScores.style.display = 'none';
   voting.style.display = "block";
   votingResults.style.display = 'none';
   role.style.display = "none";
@@ -115,8 +153,11 @@ socket.on('voting time', function(names) {
 socket.on('vote result', function(data) {
   voting.style.display = "none";
   role.style.display = "none";
+  playerScores.style.display = 'none';
   votingResults.style.display = 'block';
 
   votedName.innerHTML = data.pick;
   votedNameResult.innerHTML = data.result;
 });
+
+socket.on('display scores', displayScores);
