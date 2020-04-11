@@ -1,0 +1,59 @@
+<html>
+  <head>
+    <title>Fakin it</title>
+    <meta charset = "utf-8" name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="images/jasperboxlogo.png">
+    <script
+			  src="https://code.jquery.com/jquery-3.4.1.min.js"
+			  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+			  crossorigin="anonymous"></script>
+    <style>
+      .category input {
+        width: 80vw;
+        display: block;
+        margin-bottom: 6px;
+      }
+      #h1Hands {
+        color: rgb(255, 237, 159);
+      }#h1Point {
+        color: rgb(199, 159, 255);
+      }
+      #h1Face {
+        color: rgb(159, 206, 255);
+      }
+      #h1Numbers {
+        color: rgb(199, 255, 159);
+      }
+      .mainCat button {
+        display: block;
+      }
+    </style>
+  </head>
+  <link rel="stylesheet" href="css/main.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <body>
+    <div class ="center-outside">
+      <div class = "header-outer">
+        <header class = "jbx-header">
+          <img width = "44" height = "36" class = "jbg-top-logo" alt = "jbg-top-logo" src = "images/jasperboxlarge.png"></img>
+          <img class = "jbg-top-logo" alt = "jbg-top-logo" src = "images/logo.svg"></img>
+        </header>
+      </div>
+      <div class = "mainCat center-div" style = "margin-top: 50px;">
+        <h1 id = "h1Hands">Hands of truth</h1>
+        <ol class = "category" id = "Hands"></ol>
+        <button id = "buttonHands">Add Prompt</button>
+        <h1 id = "h1Point">You gotta point</h1>
+        <ol class = "category" id = "Point"></ol>
+        <button id = "buttonPoint">Add Prompt</button>
+        <h1 id = "h1Numbers">Number Pressure</h1>
+        <ol class = "category" id = "Numbers"></ol>
+        <button id = "buttonNumbers">Add Prompt</button>
+        <h1 id = "h1Face">Face Value</h1>
+        <ol class = "category" id = "Face"></ol>
+        <button id = "buttonFace">Add Prompt</button>
+      </div>
+    </div>
+    <script src = "js/makeDeck.js"></script>
+  </body>
+</html>

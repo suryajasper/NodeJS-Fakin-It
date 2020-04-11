@@ -37,14 +37,6 @@
   75%  {color: rgb(7, 46, 22);}
   100% {color: rgb(68, 15, 4);}
 }
-.centered {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  /* bring your own prefixes */
-  transform: translate(-50%, -50%);
-}
-
 .votecardsuper {
   position: absolute;
   top: -10px;

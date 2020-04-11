@@ -336,6 +336,9 @@ io.on('connection', function(socket){
             toScoreView.then(function() {
               var playerScoreDict = getScoreDict(playerRoomName);
               sendToAll(playerRoomName, 'display scores', playerScoreDict);
+              if (roundInfo[playerRoomName].currRound === roundInfo[playerRoomName].totalRounds) {
+
+              }
               roundInfo[playerRoomName].currRound++;
               roundInfo[playerRoomName].currTrial = 1;
               randomizeRoles(playerRoomName);
