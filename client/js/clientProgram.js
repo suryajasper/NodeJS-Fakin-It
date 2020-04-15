@@ -7,6 +7,9 @@ var playerName = document.getElementById('playerName');
 var gameName = document.getElementById('gameName');
 
 var form = document.getElementById('form');
+var optionsMenu = document.getElementById('options');
+var optionsSliders = document.getElementById('optionsSliders');
+var optionsSubmit = document.getElementById('finishedOptions');
 var lobby = document.getElementById('lobby');
 
 form.style.display = "block";
@@ -19,6 +22,17 @@ var startButton = document.querySelector('#start');
 var leaveButton = document.querySelector('#leave');
 
 var plist = document.getElementById('playerlist');
+
+function formatOptions() {
+  var sliderChildren = optionsSliders.children;
+  var optionsToReturn = {};
+  for (var i = 0; i < sliderChildren.length; i++) {
+    if (sliderChildren[i].tagName === 'input' && sliderChildren[i].getAttribute('type') === 'range') {
+      optionsToReturn[sliderChildren[i].id] = parseInt(sliderChildren[i].value);
+    }
+  }
+  return optionsToReturn;
+}
 
 function refreshList(names) {
   socket.emit('print', 'refreshing list');
@@ -41,12 +55,17 @@ function setCookie(cookieText, exdays) {
 
 createButton.onclick = function(e) {
   e.preventDefault();
-  socket.emit('createGame', {name: playerName.value, room: gameName.value});
-
   form.style.display = "none";
-  lobby.style.display = "block";
-  gameButtons.style.display = 'block';
-  footertext.style.display = 'none';
+  optionsMenu.style.display = "block";
+
+  finishedOptions.onclick = function(e2) {
+    e2.preventDefault();
+    socket.emit('createGame', {name: playerName.value, room: gameName.value, options: formatOptions()});
+    optionsMenu.style.display = "none";
+    lobby.style.display = "block";
+    gameButtons.style.display = 'block';
+    footertext.style.display = 'none';
+  }
 }
 joinButton.onclick = function(e) {
   e.preventDefault();

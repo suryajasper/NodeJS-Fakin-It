@@ -19,17 +19,17 @@
         </header>
       </div>
       <div class = "center-div">
-        <!--form class = "centered" id = "form">
+        <form class = "centered" id = "form">
           Enter your game name<br>
           <input type = "text" id = "gameName" placeholder="game id"></input><br><br>
           <p id = "nameText">Enter your name ()</p>
           <input type = "text" id = "playerName" placeholder = "your name"></input><br><br>
           <input type = "submit" id = "createButton" value = "Create Game"></input>
           <input type = "submit" id = "joinButton" value = "Join Game"></input>
-        </form-->
-        <form class = "centered" id = "options">
+        </form>
+        <form style = "display: none;" class = "centered" id = "options">
           Configure your Game Settings<br><br>
-          <div class="slidecontainer">
+          <div id = "optionsSliders" class="slidecontainer">
             <p id = "pNumRounds">Number of rounds [5]</p>
             <input type="range" min="3" max="15" value="5" class="slider" id="NumRounds">
             <p id = "pNumSecVote">Seconds to vote [20]</p>

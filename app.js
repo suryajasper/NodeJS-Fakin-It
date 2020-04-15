@@ -93,12 +93,7 @@ var randPlayers = {};
 var readyTracker = {};
 var roundInfo = {};
 
-var params = {
-  numRounds: 5,
-  numRoundsInRound: 3,
-  secondsUntilVote: 7,
-  secondsToVote: 20
-}
+var params = {};
 /*
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/client/index.html');
@@ -177,6 +172,14 @@ io.on('connection', function(socket){
     thisPlayer = new Player(data.name, socket.id, data.room);
     players[playerRoomName] = [];
     players[playerRoomName].push(thisPlayer);
+
+    params[playerRoomName] = {
+      numRounds: data.options['NumRounds'],
+      numRoundsInRound: 3,
+      secondsUntilVote: 7,
+      secondsToVote: data.options['NumSecVote']
+    };
+
     io.in(playerRoomName).emit('newPlayerList', Player.stringify(players[playerRoomName]));
   });
 
@@ -212,7 +215,7 @@ io.on('connection', function(socket){
 
   socket.on('redirect me to the game', function(){
     var destination = '/game.html';
-    roundInfo[playerRoomName] = {currRound: 1, totalRounds: params.numRounds, currTrial: 1, totalTrials: 3};
+    roundInfo[playerRoomName] = {currRound: 1, totalRounds: params[playerRoomName].numRounds, currTrial: 1, totalTrials: 3};
     io.in(playerRoomName).emit('redirect', destination);
   });
 
@@ -250,7 +253,7 @@ io.on('connection', function(socket){
     if (readyTracker[playerRoomName] === players[playerRoomName].length) {
       console.log('we bout to start waitin');
       sendToAll(playerRoomName, 'decision time', null);
-      var promise = wait(params.secondsUntilVote);
+      var promise = wait(params[playerRoomName].secondsUntilVote);
       promise.then(function() {
         playerVotes[playerRoomName] = {};
         playerVoteDecisions[playerRoomName] = {};
@@ -265,7 +268,7 @@ io.on('connection', function(socket){
         sendToAll(playerRoomName, 'voting time', listOfPlayerNames);
         console.log('we be done waitin');
 
-        var toVotePromise = wait(params.secondsToVote);
+        var toVotePromise = wait(params[playerRoomName].secondsToVote);
         toVotePromise.then(function() {
           var foundFaker = false;
           var foundLargest = false;
