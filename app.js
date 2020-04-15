@@ -179,6 +179,7 @@ io.on('connection', function(socket){
       secondsUntilVote: 7,
       secondsToVote: data.options['NumSecVote']
     };
+    console.log(params[playerRoomName]);
 
     io.in(playerRoomName).emit('newPlayerList', Player.stringify(players[playerRoomName]));
   });

@@ -27,10 +27,14 @@ function formatOptions() {
   var sliderChildren = optionsSliders.children;
   var optionsToReturn = {};
   for (var i = 0; i < sliderChildren.length; i++) {
-    if (sliderChildren[i].tagName === 'input' && sliderChildren[i].getAttribute('type') === 'range') {
+    socket.emit('print', i.toString() + ': ' + sliderChildren[i].tagName);
+    socket.emit('print', i.toString() + ': ' + sliderChildren[i].getAttribute('type'));
+    if (sliderChildren[i].tagName === 'INPUT' && sliderChildren[i].getAttribute('type') === 'range') {
+      socket.emit('print', 'we got an input');
       optionsToReturn[sliderChildren[i].id] = parseInt(sliderChildren[i].value);
     }
   }
+  socket.emit('print', optionsToReturn);
   return optionsToReturn;
 }
 
@@ -44,6 +48,12 @@ function refreshList(names) {
     li.appendChild(h3);
     plist.appendChild(li);
   }
+}
+
+function changeVal(el) {
+  var currText = document.getElementById('p' + el.id).innerHTML;
+  currText = currText.substring(0, currText.indexOf('[') + 1) + el.value.toString() + ']';
+  document.getElementById('p' + el.id).innerHTML = currText;
 }
 
 function setCookie(cookieText, exdays) {
@@ -108,3 +118,15 @@ socket.on('newPlayerList', function(newPlayerList){
   socket.emit('print', 'received a list');
   socket.emit('print', newPlayerList);
 });
+
+var ranges = document.getElementsByTagName('input');
+console.log(ranges);
+for (var i = 0; i < ranges.length; i++)(function(i) {
+  var typeOfRange = ranges[i].getAttribute('type');
+  if (typeOfRange === 'range') {
+    changeVal(ranges[i]);
+    ranges[i].oninput = function() {
+      changeVal(this);
+    };
+  }
+})(i);

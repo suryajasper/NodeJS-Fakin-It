@@ -35,24 +35,6 @@
             <p id = "pNumSecVote">Seconds to vote [20]</p>
             <input type="range" min="15" max="30" value="20" class="slider" id="NumSecVote">
           </div>
-          <script>
-            function changeVal(el) {
-              var currText = document.getElementById('p' + el.id).innerHTML;
-              currText = currText.substring(0, currText.indexOf('[') + 1) + el.value.toString() + ']';
-              document.getElementById('p' + el.id).innerHTML = currText;
-            }
-            var ranges = document.getElementsByTagName('input');
-            console.log(ranges);
-            for (var i = 0; i < ranges.length; i++)(function(i) {
-              var typeOfRange = ranges[i].getAttribute('type');
-              changeVal(ranges[i]);
-              if (typeOfRange === 'range') {
-                ranges[i].oninput = function() {
-                  changeVal(this);
-                };
-              }
-            })(i);
-          </script>
           <input type = "submit" id = "finishedOptions"></input>
         </form>
         <div style = "display: none;" id = "lobby">
