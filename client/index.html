@@ -19,13 +19,41 @@
         </header>
       </div>
       <div class = "center-div">
-        <form id = "form">
+        <!--form class = "centered" id = "form">
           Enter your game name<br>
           <input type = "text" id = "gameName" placeholder="game id"></input><br><br>
           <p id = "nameText">Enter your name ()</p>
           <input type = "text" id = "playerName" placeholder = "your name"></input><br><br>
           <input type = "submit" id = "createButton" value = "Create Game"></input>
           <input type = "submit" id = "joinButton" value = "Join Game"></input>
+        </form-->
+        <form class = "centered" id = "options">
+          Configure your Game Settings<br><br>
+          <div class="slidecontainer">
+            <p id = "pNumRounds">Number of rounds [5]</p>
+            <input type="range" min="3" max="15" value="5" class="slider" id="NumRounds">
+            <p id = "pNumSecVote">Seconds to vote [20]</p>
+            <input type="range" min="15" max="30" value="20" class="slider" id="NumSecVote">
+          </div>
+          <script>
+            function changeVal(el) {
+              var currText = document.getElementById('p' + el.id).innerHTML;
+              currText = currText.substring(0, currText.indexOf('[') + 1) + el.value.toString() + ']';
+              document.getElementById('p' + el.id).innerHTML = currText;
+            }
+            var ranges = document.getElementsByTagName('input');
+            console.log(ranges);
+            for (var i = 0; i < ranges.length; i++)(function(i) {
+              var typeOfRange = ranges[i].getAttribute('type');
+              changeVal(ranges[i]);
+              if (typeOfRange === 'range') {
+                ranges[i].oninput = function() {
+                  changeVal(this);
+                };
+              }
+            })(i);
+          </script>
+          <input type = "submit" id = "finishedOptions"></input>
         </form>
         <div style = "display: none;" id = "lobby">
           <h1>Waiting for more players to join</h1>

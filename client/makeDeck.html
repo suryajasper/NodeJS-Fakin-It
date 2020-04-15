@@ -24,8 +24,49 @@
       #h1Numbers {
         color: rgb(199, 255, 159);
       }
+      button {
+        box-shadow: 5px #ffffff:
+      }
       .mainCat button {
         display: block;
+        position: relative;
+        left: 50%;
+        transform: translate(-50%, 0%);
+      }
+      .dbutton {
+        display: inline-block;
+        margin-left: 12px;
+      }
+      .wrap {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .button {
+        width: 140px;
+        height: 45px;
+        font-family: 'Roboto', sans-serif;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 2.5px;
+        font-weight: 500;
+        color: #000;
+        background-color: #fff;
+        border: none;
+        border-radius: 45px;
+        box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease 0s;
+        cursor: pointer;
+        outline: none;
+        }
+
+      .button:hover {
+        background-color: #2EE59D;
+        box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
+        color: #fff;
+        transform: translateY(-7px);
       }
     </style>
   </head>
@@ -39,7 +80,12 @@
           <img class = "jbg-top-logo" alt = "jbg-top-logo" src = "images/logo.svg"></img>
         </header>
       </div>
-      <div class = "mainCat center-div" style = "margin-top: 50px;">
+      <div style = "margin-top: 60px;">
+        <button class = "dbutton" id = "save">Save</button>
+        <button class = "dbutton" id = "download">Download</button>
+        <button class = "dbutton" id = "load">Load</button>
+      </div>
+      <div class = "mainCat center-div" style = "margin-top: 0px;">
         <h1 id = "h1Hands">Hands of truth</h1>
         <ol class = "category" id = "Hands"></ol>
         <button id = "buttonHands">Add Prompt</button>
