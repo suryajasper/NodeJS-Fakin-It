@@ -6,7 +6,7 @@ function roundString(val) {
   return val.toFixed(1);
 }
 
-function countdown(sec, id) {
+function countdown(sec) {
   var start = new Date().getTime();
   var x = setInterval(function() {
     var now = new Date().getTime();
@@ -20,11 +20,9 @@ function countdown(sec, id) {
       clearInterval(x);
     }
 
-    document.getElementById(id).innerHTML = roundString(sec - seconds);
+    document.getElementById('timer').innerHTML = roundString(sec - seconds);
   }, 10);
 }
-
-countdown(2, 'timer');
 
 var roleDiv = document.querySelector('#role');
 
@@ -189,3 +187,5 @@ socket.on('vote result', function(data) {
 });
 
 socket.on('display scores', displayScores);
+
+socket.on('countdown', countdown);

@@ -63,12 +63,6 @@ Array.prototype.remove = function() {
   return this;
 };
 
-async function wait(timeout) {
-  return new Promise(resolve => {
-    setTimeout(resolve, timeout*1000);
-  });
-}
-
 function getKeyByValue(object, value) {
   for (var prop in object) {
     if (object.hasOwnProperty(prop)) {
@@ -139,6 +133,13 @@ function sendToAll(room, header, data) {
       playerSockets[room][i].emit(header, data);
     }
   }
+}
+
+async function wait(roomName, timeout) {
+  sendToAll(roomName, 'countdown', timeout);
+  return new Promise(resolve => {
+    setTimeout(resolve, timeout*1000);
+  });
 }
 
 io.on('connection', function(socket){
@@ -254,7 +255,7 @@ io.on('connection', function(socket){
     if (readyTracker[playerRoomName] === players[playerRoomName].length) {
       console.log('we bout to start waitin');
       sendToAll(playerRoomName, 'decision time', null);
-      var promise = wait(params[playerRoomName].secondsUntilVote);
+      var promise = wait(playerRoomName, params[playerRoomName].secondsUntilVote);
       promise.then(function() {
         playerVotes[playerRoomName] = {};
         playerVoteDecisions[playerRoomName] = {};
@@ -269,7 +270,7 @@ io.on('connection', function(socket){
         sendToAll(playerRoomName, 'voting time', listOfPlayerNames);
         console.log('we be done waitin');
 
-        var toVotePromise = wait(params[playerRoomName].secondsToVote);
+        var toVotePromise = wait(playerRoomName, params[playerRoomName].secondsToVote);
         toVotePromise.then(function() {
           var foundFaker = false;
           var foundLargest = false;
@@ -336,7 +337,7 @@ io.on('connection', function(socket){
           }
           readyTracker[playerRoomName] = 0;
           if (foundFaker || (roundInfo[playerRoomName].currTrial > roundInfo[playerRoomName].totalTrials)) {
-            var toScoreView = wait(7);
+            var toScoreView = wait(playerRoomName, 7);
             toScoreView.then(function() {
               var playerScoreDict = getScoreDict(playerRoomName);
               sendToAll(playerRoomName, 'display scores', playerScoreDict);
@@ -346,7 +347,7 @@ io.on('connection', function(socket){
               roundInfo[playerRoomName].currRound++;
               roundInfo[playerRoomName].currTrial = 1;
               randomizeRoles(playerRoomName);
-              var toNextRoundPromise = wait(7);
+              var toNextRoundPromise = wait(playerRoomName, 7);
               toNextRoundPromise.then(function() {
                 sendToAll(playerRoomName, 'update round info', roundInfo[playerRoomName]);
                 console.log('getting roles for everyone');
@@ -354,7 +355,7 @@ io.on('connection', function(socket){
               })
             })
           } else {
-            var toNextRoundPromise = wait(7);
+            var toNextRoundPromise = wait(playerRoomName, 7);
             toNextRoundPromise.then(function() {
               sendToAll(playerRoomName, 'update round info', roundInfo[playerRoomName]);
               sendEveryoneTheirRoles();

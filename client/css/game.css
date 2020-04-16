@@ -60,7 +60,7 @@
   border-spacing: 0 15px;
 }
 #playerScores table tbody tr td {
-  width: 49%;
+  width: 28vw;
   display: inline-block;
 }
 #playerScores table tbody tr td h3, p {
