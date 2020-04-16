@@ -1,3 +1,31 @@
+function round(val) {
+  return Math.round(10*val)/10;
+}
+
+function roundString(val) {
+  return val.toFixed(1);
+}
+
+function countdown(sec, id) {
+  var start = new Date().getTime();
+  var x = setInterval(function() {
+    var now = new Date().getTime();
+
+    var distance = now - start;
+
+    var seconds = round((distance % (1000 * 60)) / 1000);
+
+    if (seconds >= sec) {
+      console.log('interval stopped');
+      clearInterval(x);
+    }
+
+    document.getElementById(id).innerHTML = roundString(sec - seconds);
+  }, 10);
+}
+
+countdown(2, 'timer');
+
 var roleDiv = document.querySelector('#role');
 
 var roleOut = document.querySelector('#prompt');
