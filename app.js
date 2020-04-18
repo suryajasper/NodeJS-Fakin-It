@@ -255,113 +255,116 @@ io.on('connection', function(socket){
     if (readyTracker[playerRoomName] === players[playerRoomName].length) {
       console.log('we bout to start waitin');
       sendToAll(playerRoomName, 'decision time', null);
-      var promise = wait(playerRoomName, params[playerRoomName].secondsUntilVote);
-      promise.then(function() {
-        playerVotes[playerRoomName] = {};
-        playerVoteDecisions[playerRoomName] = {};
-        for (var i = 0; i < players[playerRoomName].length; i++) {
-          playerVotes[playerRoomName][players[playerRoomName][i].name] = 0;
-          playerVoteDecisions[playerRoomName][players[playerRoomName][i].name] = null;
-        }
-        var listOfPlayerNames = [];
-        for (var i = 0; i < players[playerRoomName].length; i++) {
-          listOfPlayerNames.push(players[playerRoomName][i].name);
-        }
-        sendToAll(playerRoomName, 'voting time', listOfPlayerNames);
-        console.log('we be done waitin');
+      var promise1 = wait(playerRoomName, 8);
+      promise1.then(function() {
+        var promise = wait(playerRoomName, params[playerRoomName].secondsUntilVote);
+        promise.then(function() {
+          playerVotes[playerRoomName] = {};
+          playerVoteDecisions[playerRoomName] = {};
+          for (var i = 0; i < players[playerRoomName].length; i++) {
+            playerVotes[playerRoomName][players[playerRoomName][i].name] = 0;
+            playerVoteDecisions[playerRoomName][players[playerRoomName][i].name] = null;
+          }
+          var listOfPlayerNames = [];
+          for (var i = 0; i < players[playerRoomName].length; i++) {
+            listOfPlayerNames.push(players[playerRoomName][i].name);
+          }
+          sendToAll(playerRoomName, 'voting time', listOfPlayerNames);
+          console.log('we be done waitin');
 
-        var toVotePromise = wait(playerRoomName, params[playerRoomName].secondsToVote);
-        toVotePromise.then(function() {
-          var foundFaker = false;
-          var foundLargest = false;
-          /* Give points to whoever guessed correctly */
-          for (var i = 0; i < Object.keys(playerVoteDecisions[playerRoomName]).length; i++) {
-            var playerWhoDecided = Object.keys(playerVoteDecisions[playerRoomName])[i];
-            var tempDecision = playerVoteDecisions[playerRoomName][playerWhoDecided];
-            if (tempDecision === randPlayers[playerRoomName]) {
-              for (var j = 0; j < players[playerRoomName].length; j++) {
-                if (players[playerRoomName][j].name === playerWhoDecided) {
-                  players[playerRoomName][j].addPoints(100);
+          var toVotePromise = wait(playerRoomName, params[playerRoomName].secondsToVote);
+          toVotePromise.then(function() {
+            var foundFaker = false;
+            var foundLargest = false;
+            /* Give points to whoever guessed correctly */
+            for (var i = 0; i < Object.keys(playerVoteDecisions[playerRoomName]).length; i++) {
+              var playerWhoDecided = Object.keys(playerVoteDecisions[playerRoomName])[i];
+              var tempDecision = playerVoteDecisions[playerRoomName][playerWhoDecided];
+              if (tempDecision === randPlayers[playerRoomName]) {
+                for (var j = 0; j < players[playerRoomName].length; j++) {
+                  if (players[playerRoomName][j].name === playerWhoDecided) {
+                    players[playerRoomName][j].addPoints(100);
+                  }
                 }
               }
             }
-          }
-          Object.keys(playerVotes[playerRoomName]).forEach(function(voteName) {
-            var voteTally = playerVotes[playerRoomName][voteName];
-            console.log(voteName, voteTally);
-            if (voteTally >= players[playerRoomName].length-1) {
-              if (voteName === randPlayers[playerRoomName]) {
-                sendToAll(playerRoomName, 'vote result', {pick: voteName, result: 'IS the faker'});
-                foundFaker = true;
+            Object.keys(playerVotes[playerRoomName]).forEach(function(voteName) {
+              var voteTally = playerVotes[playerRoomName][voteName];
+              console.log(voteName, voteTally);
+              if (voteTally >= players[playerRoomName].length-1) {
+                if (voteName === randPlayers[playerRoomName]) {
+                  sendToAll(playerRoomName, 'vote result', {pick: voteName, result: 'IS the faker'});
+                  foundFaker = true;
+                } else {
+                  for (var pInd = 0; pInd < players[playerRoomName].length; pInd++) {
+                    if (players[playerRoomName][pInd].name === randPlayers[playerRoomName]) {
+                      players[playerRoomName][pInd].addPoints(150);
+                      break;
+                    }
+                  }
+                  sendToAll(playerRoomName, 'vote result', {pick: voteName, result: 'is NOT the faker'});
+                }
+                foundLargest = true;
+              }
+            });
+            if (!foundLargest) {
+              for (var pInd = 0; pInd < players[playerRoomName].length; pInd++) {
+                if (players[playerRoomName][pInd].name === randPlayers[playerRoomName]) {
+                  players[playerRoomName][pInd].addPoints(75);
+                  break;
+                }
+              }
+              if (roundInfo[playerRoomName].currTrial === roundInfo[playerRoomName].totalTrials) {
+                sendToAll(playerRoomName, 'vote result', {pick: randPlayers[playerRoomName], result: 'evaded capture'});
               } else {
-                for (var pInd = 0; pInd < players[playerRoomName].length; pInd++) {
-                  if (players[playerRoomName][pInd].name === randPlayers[playerRoomName]) {
-                    players[playerRoomName][pInd].addPoints(150);
-                    break;
+                sendToAll(playerRoomName, 'vote result', {pick: 'The faker', result: 'is still at large'});
+              }
+            }
+            roundInfo[playerRoomName].currTrial++;
+            printScores(playerRoomName);
+            var sendEveryoneTheirRoles = function() {
+              for (var i = 0; i < players[playerRoomName].length; i++) {
+                if (players[playerRoomName][i].name === randPlayers[playerRoomName]) {
+                  for (var j = 0; j < playerSockets[playerRoomName].length; j++) {
+                    if (playerSockets[playerRoomName][j].id === players[playerRoomName][i].id) {
+                      playerSockets[playerRoomName][j].emit('get role', "Try to blend in!!!");
+                    }
+                    else {
+                      playerSockets[playerRoomName][j].emit('get role', "raise your hand if you're low iq");
+                    }
                   }
+                  break;
                 }
-                sendToAll(playerRoomName, 'vote result', {pick: voteName, result: 'is NOT the faker'});
-              }
-              foundLargest = true;
-            }
-          });
-          if (!foundLargest) {
-            for (var pInd = 0; pInd < players[playerRoomName].length; pInd++) {
-              if (players[playerRoomName][pInd].name === randPlayers[playerRoomName]) {
-                players[playerRoomName][pInd].addPoints(75);
-                break;
               }
             }
-            if (roundInfo[playerRoomName].currTrial === roundInfo[playerRoomName].totalTrials) {
-              sendToAll(playerRoomName, 'vote result', {pick: randPlayers[playerRoomName], result: 'evaded capture'});
-            } else {
-              sendToAll(playerRoomName, 'vote result', {pick: 'The faker', result: 'is still at large'});
-            }
-          }
-          roundInfo[playerRoomName].currTrial++;
-          printScores(playerRoomName);
-          var sendEveryoneTheirRoles = function() {
-            for (var i = 0; i < players[playerRoomName].length; i++) {
-              if (players[playerRoomName][i].name === randPlayers[playerRoomName]) {
-                for (var j = 0; j < playerSockets[playerRoomName].length; j++) {
-                  if (playerSockets[playerRoomName][j].id === players[playerRoomName][i].id) {
-                    playerSockets[playerRoomName][j].emit('get role', "Try to blend in!!!");
-                  }
-                  else {
-                    playerSockets[playerRoomName][j].emit('get role', "raise your hand if you're low iq");
-                  }
-                }
-                break;
-              }
-            }
-          }
-          readyTracker[playerRoomName] = 0;
-          if (foundFaker || (roundInfo[playerRoomName].currTrial > roundInfo[playerRoomName].totalTrials)) {
-            var toScoreView = wait(playerRoomName, 7);
-            toScoreView.then(function() {
-              var playerScoreDict = getScoreDict(playerRoomName);
-              sendToAll(playerRoomName, 'display scores', playerScoreDict);
-              if (roundInfo[playerRoomName].currRound === roundInfo[playerRoomName].totalRounds) {
+            readyTracker[playerRoomName] = 0;
+            if (foundFaker || (roundInfo[playerRoomName].currTrial > roundInfo[playerRoomName].totalTrials)) {
+              var toScoreView = wait(playerRoomName, 7);
+              toScoreView.then(function() {
+                var playerScoreDict = getScoreDict(playerRoomName);
+                sendToAll(playerRoomName, 'display scores', playerScoreDict);
+                if (roundInfo[playerRoomName].currRound === roundInfo[playerRoomName].totalRounds) {
 
-              }
-              roundInfo[playerRoomName].currRound++;
-              roundInfo[playerRoomName].currTrial = 1;
-              randomizeRoles(playerRoomName);
+                }
+                roundInfo[playerRoomName].currRound++;
+                roundInfo[playerRoomName].currTrial = 1;
+                randomizeRoles(playerRoomName);
+                var toNextRoundPromise = wait(playerRoomName, 7);
+                toNextRoundPromise.then(function() {
+                  sendToAll(playerRoomName, 'update round info', roundInfo[playerRoomName]);
+                  console.log('getting roles for everyone');
+                  sendEveryoneTheirRoles();
+                })
+              })
+            } else {
               var toNextRoundPromise = wait(playerRoomName, 7);
               toNextRoundPromise.then(function() {
                 sendToAll(playerRoomName, 'update round info', roundInfo[playerRoomName]);
-                console.log('getting roles for everyone');
                 sendEveryoneTheirRoles();
               })
-            })
-          } else {
-            var toNextRoundPromise = wait(playerRoomName, 7);
-            toNextRoundPromise.then(function() {
-              sendToAll(playerRoomName, 'update round info', roundInfo[playerRoomName]);
-              sendEveryoneTheirRoles();
-            })
-          }
-        })
+            }
+          })
+        })
       })
     }
   });
