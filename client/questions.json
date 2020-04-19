@@ -1,16 +1,6 @@
 {
-  "Hands": [
-    "hello",
-    "howdie"
-  ],
-  "Numbers": [
-
-  ],
-  "Face": [
-    "surya",
-    "jasper"
-  ],
-  "Point": [
-
-  ]
+  "Hands": [],
+  "Numbers": [],
+  "Face": [],
+  "Point": []
 }

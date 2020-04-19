@@ -73,6 +73,8 @@ function getKeyByValue(object, value) {
 }
 
 var express = require('express');
+var fs = require('fs');
+
 var app = express();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
@@ -146,6 +148,43 @@ io.on('connection', function(socket){
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
   /*<<<<<<<<<<<<<<<<<CONNECTIONS AND DISCONNECTIONS>>>>>>>>>>>>>>>>>>>*/
   /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
+
+  var sendEmail = (obj) => {
+    const sgMail = require('@sendgrid/mail');
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+    /*fs.writeFile("/questions.json", JSON.stringify(obj), (err) => {
+      if (err) {
+        console.error(err);
+        return;
+      };
+      console.log("File has been edited");
+    });*/
+
+    var attachment = Buffer.from(JSON.stringify(obj)).toString("base64");
+    console.log(attachment);
+
+    const msg = {
+      to: 'nodejsfakinit.suryajasper@gmail.com',
+      from: 'jake2007smith@gmail.com',
+      subject: 'NodeJS Prompts',
+      text: "Here are the prompts I've created.",
+      attachments: [
+        {
+          content: attachment,
+          filename: "genPrompts.json",
+          type: "application/json",
+          disposition: "attachment"
+        }
+      ]
+    };
+    console.log('from ' + msg.from);
+
+    sgMail.send(msg).catch(err => {
+      console.log(err);
+      console.log(err.response.body.errors);
+    });
+  }
 
   var thisPlayer;
   var playerRoomName;
@@ -383,6 +422,8 @@ io.on('connection', function(socket){
     }
     sendToAll(playerRoomName, 'refresh votes', playerVotes[playerRoomName]);
   });
+
+  socket.on('sendEmail', sendEmail);
 });
 
 http.listen(gameID, function(){

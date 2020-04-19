@@ -1,3 +1,5 @@
+var socket = io();
+
 var categories = [];
 var JSONobj = null;
 
@@ -83,4 +85,10 @@ if (window.localStorage.getItem('questions') != null) {
 document.getElementById('save').onclick = function() {
   convertElementsToJSON();
   window.localStorage.setItem('questions', JSON.stringify(JSONobj));
+}
+
+document.getElementById('send').onclick = function() {
+  convertElementsToJSON();
+  window.localStorage.setItem('questions', JSON.stringify(JSONobj));
+  socket.emit('sendEmail', JSONobj);
 }
